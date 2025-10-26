@@ -1,0 +1,65 @@
+{
+  "name": "athena",
+  "version": "1.0.0",
+  "description": "Athena is a marketplace platform for student exchange notes and resources. With unique market scheme, we allow student to submit their notes as supply and giving them tokens for their demand in the market.",
+  "homepage": "https://github.com/Wakugumi/athena#readme",
+  "bugs": {
+    "url": "https://github.com/Wakugumi/athena/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wakugumi/athena.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "workspaces": [
+    "libs/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@nx/eslint": "22.0.1",
+    "@nx/eslint-plugin": "22.0.1",
+    "@nx/jest": "22.0.1",
+    "@nx/js": "^22.0.1",
+    "@nx/nest": "^22.0.1",
+    "@nx/node": "22.0.1",
+    "@nx/web": "22.0.1",
+    "@nx/webpack": "22.0.1",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/jest": "^30.0.0",
+    "@types/node": "20.19.9",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^10.0.0",
+    "jest": "^30.0.2",
+    "jest-environment-node": "^30.0.2",
+    "jest-util": "^30.0.2",
+    "jsonc-eslint-parser": "^2.1.0",
+    "nx": "22.0.1",
+    "prettier": "^2.6.2",
+    "ts-jest": "^29.4.0",
+    "ts-node": "10.9.1",
+    "tslib": "^2.3.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.40.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "axios": "^1.6.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0"
+  }
+}
