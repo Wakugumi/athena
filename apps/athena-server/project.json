@@ -1,7 +1,7 @@
 {
   "name": "athena-server",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "athena-server/src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/athena-server/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -10,7 +10,7 @@
       "options": {
         "command": "webpack-cli build",
         "args": ["--node-env=production"],
-        "cwd": "athena-server"
+        "cwd": "apps/athena-server"
       },
       "configurations": {
         "development": {
@@ -23,8 +23,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/athena-server/package.json",
-        "{workspaceRoot}/dist/athena-server/package-lock.json"
+        "{workspaceRoot}/dist/apps/athena-server/package.json",
+        "{workspaceRoot}/dist/apps/athena-server/package-lock.json"
       ],
       "options": {
         "buildTarget": "build"
@@ -33,7 +33,7 @@
     "copy-workspace-modules": {
       "dependsOn": ["build"],
       "cache": true,
-      "outputs": ["{workspaceRoot}/dist/athena-server/workspace_modules"],
+      "outputs": ["{workspaceRoot}/dist/apps/athena-server/workspace_modules"],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
         "buildTarget": "build"
