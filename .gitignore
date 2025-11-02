@@ -1,0 +1,47 @@
+node_modules
+
+
+
+# Node
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Output directories
+dist/
+build/
+tmp/
+temp/
+
+# Nx cache
+.nx/
+.cache/
+.next/
+
+# Environment files
+.env
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Mac / OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Optional: lock files if using different package managers across devs
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

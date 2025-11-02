@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "lib": [
+      "DOM",
+      "ES2021"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@athena/*": [
+        "libs/*/src/index.ts"
+      ]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "apps",
+    "packages"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
