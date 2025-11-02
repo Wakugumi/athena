@@ -5,6 +5,8 @@
  * Token Model — Shared Type System
  * Token representation for transaction ledger.
  * Update ledger per single DB transaction;
+ *
+ * Note: This type is mainly for backend purpose, not intended for public facing apps
  * ================================
  *
  * Log:
@@ -58,6 +60,9 @@ export interface TokenBalance {
  * Immutable ledger record of all token movements.
  * Use as the single source of truth for audits and reconciliation.
  * Never delete or modify existing rows — append new entries.
+ *
+ * Dev Notes:
+ * This act as schema for database table
  */
 export interface TokenTransaction {
   id: UUID;
@@ -89,18 +94,3 @@ export interface MarketplaceEscrow {
   updatedAt: string;
 }
 
-/**
- * Tracks fiat-to-token purchase flow via external payment providers.
- * Must be idempotent and linked to provider webhooks.
- * On success, mint equivalent tokens to user balance.
- */
-export interface PaymentIntent {
-  id: UUID;
-  userId: UUID;
-  amountFiat: number;
-  expectedTokens: number;
-  status: 'CREATED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
-  provider: 'STRIPE' | 'PAYPAL' | 'OTHER';
-  createdAt: string;
-  updatedAt: string;
-}
