@@ -13,7 +13,7 @@ export interface CreateUserRequest {
 
   // Optional properties for this request
   // Backend handle this in different procedure (e.g. update public profile)
-  displayName?: string;
+  displayName?: string | null;
   /**
   * Direct upload image's content
   */
@@ -26,14 +26,14 @@ export interface CreateUserRequest {
  * Request or updating user's public data
   */
 export interface UpdateProfileRequest {
-  firstName?: string;
-  lastName?: string
-  displayName?: string;
-  /**
-  * Direct upload image's content
-  */
-  avatar?: File | Buffer | string | Blob;
-  bio?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  displayName?: string | null;
+  bio?: string | null
+}
+
+export interface UpdateAvatarRequest {
+  blob: Blob | File | Base64URLString;
 }
 
 /**

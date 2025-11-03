@@ -5,4 +5,5 @@ export type ApiResponse<T> = {
    * Backend ensure an friendly error message
    */
   error?: string;
+  message?: string
 }

@@ -15,11 +15,6 @@ export type UserUpdatedResponse = ApiResponse<UserWithoutPassword>
 
 
 /**
- * Response for requesting current's user data without password
- */
-export type MeResponse = ApiResponse<UserWithoutPassword>
-
-/**
  * Response for getting one user
   */
 export type FindOneUserResponse = ApiResponse<PublicUser>

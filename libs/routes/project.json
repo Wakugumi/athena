@@ -1,0 +1,19 @@
+{
+  "name": "routes",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/routes/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/routes",
+        "main": "libs/routes/src/index.ts",
+        "tsConfig": "libs/routes/tsconfig.lib.json",
+        "assets": ["libs/routes/*.md"]
+      }
+    }
+  }
+}
