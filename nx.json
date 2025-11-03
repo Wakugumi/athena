@@ -27,7 +27,10 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["athena-server-e2e/**/*", "apps/athena-server-e2e/**/*"]
+      "exclude": [
+        "athena-server-e2e/**/*",
+        "apps/athena-server-e2e/**/*"
+      ]
     },
     {
       "plugin": "@nx/webpack/plugin",
@@ -43,9 +46,14 @@
   ],
   "targetDefaults": {
     "@nx/js:tsc": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["default", "^default"]
+      "cache": false,
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "default",
+        "^default"
+      ]
     }
   }
 }

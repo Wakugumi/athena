@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "lib": [
-      "DOM",
-      "ES2021"
-    ],
+    "lib": ["DOM", "ES2021"],
     "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
@@ -15,18 +12,11 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@athena/*": [
-        "libs/*/src/index.ts"
-      ]
+      "@athena/*": ["libs/*/src/index.ts"],
+      "routes": ["libs/routes/src/index.ts"]
     },
     "noEmit": true
   },
-  "include": [
-    "apps",
-    "packages"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["apps", "libs"],
+  "exclude": ["node_modules", "dist"]
 }

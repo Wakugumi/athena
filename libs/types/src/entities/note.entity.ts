@@ -21,11 +21,11 @@ export interface Note {
 
   title: string;
   content: string;
-  summary?: string;
-  embeddingVector?: number[];   // For RAG / semantic search
+  summary?: string | null
+  embeddingVector?: number[] | null;   // For RAG / semantic search
 
   tags: string[];
-  folderId?: ID;
+  folderId?: ID | null;
   isPinned: boolean;
   isArchived: boolean;
   isTrashed: boolean;

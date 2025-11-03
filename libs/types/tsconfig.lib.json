@@ -2,11 +2,16 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
     "declaration": true,
     "types": [
       "node"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@athena/*": [
+        "../../libs/*/src/index.ts"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts"

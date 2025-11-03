@@ -36,4 +36,4 @@ export interface Transaction {
 }
 
 
-export type PublicTransaction = Omit<Transaction, "escrowId", ""
+export type PublicTransaction = Omit<Transaction, "escrowId">

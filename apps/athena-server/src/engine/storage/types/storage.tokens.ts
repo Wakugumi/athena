@@ -1,0 +1,2 @@
+export const STORAGE_STRATEGY = Symbol('STORAGE_STRATEGY');
+export const STORAGE_OPTIONS = Symbol('STORAGE_OPTIONS');
