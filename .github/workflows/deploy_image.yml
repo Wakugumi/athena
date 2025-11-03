@@ -36,8 +36,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/api:${{ github.sha }} -f apps/athena-server/Dockerfile .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/athena-server:${{ github.sha }} -f apps/athena-server/Dockerfile .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/api:${{ github.sha }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/athena-server:${{ github.sha }}
