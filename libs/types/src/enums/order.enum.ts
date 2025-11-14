@@ -1,5 +1,5 @@
 
-export enum TransactionStatus {
+export enum OrderStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
   REFUNDED = 'REFUNDED',

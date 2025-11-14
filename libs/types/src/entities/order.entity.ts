@@ -8,12 +8,12 @@
  *
  * Log:
  *  - 26 Oct 2025, Ananda Risyad
+ *  - 4 Nov 2025, Ananda Risyad : Change name to Order
  */
 
-import { UUID } from "crypto";
 import { ID } from "../common/datatype.common";
-import { TransactionStatus } from "../enums/transaction.enum";
-export interface Transaction {
+import { OrderStatus } from "../enums/order.enum";
+export interface Order {
   /**
    * Represents a full purchase lifecycle for a note.
    * Created when a buyer initiates a purchase.
@@ -24,16 +24,16 @@ export interface Transaction {
   buyerId: ID;
   sellerId: ID
   escrowId: ID
-  status: TransactionStatus;
+  status: OrderStatus;
   /**
    * price amount at time of purchase
    */
-  price: number;
+  amount: number;
   createdAt: string;
   updatedAt: string;
-  completedAt?: string;
-  refundedAt?: string;
+  completedAt?: string | null;
+  refundedAt?: string | null
 }
 
 
-export type PublicTransaction = Omit<Transaction, "escrowId">
+export type PublicOrder = Omit<Order, "escrowId">

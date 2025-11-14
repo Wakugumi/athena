@@ -18,6 +18,7 @@ export interface Listing {
   noteId: ID;
   sellerId: ID;
   title: string;
+  description: string;
   summary: string;
   preview?: string;
   price: number;

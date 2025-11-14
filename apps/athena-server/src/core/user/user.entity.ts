@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index, OneToOne, Relation, OneToMany } from "typeorm";
 import { User as SharedUser } from "@athena/types"
 import { UUID } from "crypto";
 import { IsEmail, Matches } from "class-validator";
 import { USERNAME_REGEX } from "src/engine/auth/utils/auth.util";
+import { Wallet } from "../wallet/entities/wallet.entity";
 
 @Entity('user')
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
@@ -45,6 +46,17 @@ export class User implements SharedUser {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  wallet: Relation<Wallet>
+
+  @OneToMany(() => Transaction, (transaction) => transaction.buyer)
+  buyTransactions: Relation<Transaction[]>
+
+
+  @OneToMany(() => Transaction, (transaction) => transaction.seller)
+  sellTransactions: Relation<Transaction[]>
+
 
 
 }

@@ -1,22 +1,22 @@
 import { ID } from "../../common/datatype.common"
-import { TransactionStatus } from "../../enums/transaction.enum";
+import { OrderStatus } from "../../enums/order.enum";
 
-export interface CreateTransactionRequest {
+export interface CreateOrderRequest {
   listingId: ID
   buyerId: ID
 }
 
-export interface UpdateTransactionRequest {
+export interface UpdateOrderRequest {
   id: ID;
-  status?: TransactionStatus
+  status?: OrderStatus
 }
 
 
-export interface CancelTransactionRequest {
+export interface CancelOrderRequest {
   id: ID
 }
 
-export interface FindOneTransactionQuery {
+export interface FindOneOrderQuery {
   id?: ID;
   /**
    * will return the latest one if there are multiple returned
@@ -24,11 +24,11 @@ export interface FindOneTransactionQuery {
   listingId?: ID
 }
 
-export interface FindTransactionsQuery {
+export interface FindOrdersQuery {
   listingId?: ID;
   buyerId?: ID;
   sellerId?: ID;
-  status?: TransactionStatus;
+  status?: OrderStatus;
 
   priceMin?: number;
   priceMax?: number;

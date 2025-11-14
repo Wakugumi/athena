@@ -23,7 +23,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "src/*": [
-        "src/*"
+        "./src/*"
       ],
       "@athena/*": [
         "../../libs/*/src/index.ts"
