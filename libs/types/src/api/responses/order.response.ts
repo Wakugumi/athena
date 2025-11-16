@@ -3,7 +3,7 @@ import { ApiResponse } from "../../utils/api-response";
 
 export type CreatedOrderResponse = ApiResponse<PublicOrder>
 
-export type UpdatedOrderResponse = ApiResponse<PublicOrder>
+export type ProcessOrderResponse = ApiResponse<PublicOrder>
 
 export type CancelOrderResponse = ApiResponse<PublicOrder>
 

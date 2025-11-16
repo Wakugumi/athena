@@ -1,17 +1,25 @@
 import { ID } from "../../common/datatype.common"
 import { OrderStatus } from "../../enums/order.enum";
 
+/**
+ * Request called by a user who wants to purchase a listing
+ */
 export interface CreateOrderRequest {
   listingId: ID
   buyerId: ID
 }
 
-export interface UpdateOrderRequest {
+/**
+ * Request called by a seller who wants to process their pending order
+ */
+export interface ProcessOrderRequest {
   id: ID;
-  status?: OrderStatus
 }
 
 
+/**
+ * Request from buyer who will cancel their pending order
+ */
 export interface CancelOrderRequest {
   id: ID
 }
