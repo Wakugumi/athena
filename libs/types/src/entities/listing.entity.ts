@@ -13,9 +13,14 @@ import { License } from "../enums/license.enum";
 import { Visibility } from "../enums/visibility.enum";
 import { ID } from "../common/datatype.common";
 
+interface ListingItem {
+  noteId: ID;
+  listingId: ID;
+}
+
 export interface Listing {
   id: ID;
-  noteId: ID;
+  items: ListingItem[]
   sellerId: ID;
   title: string;
   description: string;

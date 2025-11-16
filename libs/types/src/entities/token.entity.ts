@@ -47,14 +47,20 @@ export enum TokenLedgerType {
   DEBIT = 'DEBIT'
 }
 
+export enum WalletOwnerType {
+  USER = 'USER',
+  ESCROW = 'ESCROW',
+  SYSTEM = 'SYSTEM',
+  FEE = 'FEE'
+}
 /**
    * Represents the current token balance for a user.
    * Always update through transactional operations to prevent race conditions.
    */
 export interface Wallet {
   id: ID
-  userId: ID
-  tokenType: 'UTILITY';
+  ownerType: WalletOwnerType
+  ownerId: ID;
   balance: string; // avoid JS float rounding
   updatedAt: string;
 }

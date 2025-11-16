@@ -21,6 +21,7 @@ export interface Note {
 
   title: string;
   content: string;
+  attachments?: string[] | null;
   summary?: string | null
   embeddingVector?: number[] | null;   // For RAG / semantic search
 
