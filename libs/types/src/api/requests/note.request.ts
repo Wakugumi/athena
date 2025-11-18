@@ -1,3 +1,4 @@
+import { ContentTypes } from "src/enums";
 import { ID } from "../../common";
 
 export interface CreateNoteRequest {
@@ -17,5 +18,15 @@ export interface FindNotesQuery {
   offset?: number;
   sortBy?: 'createdAt' | 'updatedAt' | 'title';
   sortOrder?: 'asc' | 'desc';
+
+}
+
+/**
+ * Interface for requesting url for image upload that will be transformed into new note
+  */
+export interface CreatePhotonoteRequest {
+  contentType: ContentTypes
+
+
 
 }

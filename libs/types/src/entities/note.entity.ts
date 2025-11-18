@@ -21,6 +21,7 @@ export interface Note {
 
   title: string;
   content: string;
+  attachments?: NoteAttachment[] | null;
   summary?: string | null
   embeddingVector?: number[] | null;   // For RAG / semantic search
 
@@ -43,6 +44,15 @@ export interface Note {
   aiMetadata?: AIMetadata;
 }
 
+export interface NoteAttachment {
+  id: ID;
+  key: string;                 // storage object key
+  url: string;                 // public or signed URL
+  originalFilename: string;
+  contentType: string;
+  size: number;
+  createdAt: Date;
+}
 
 export enum CollaboratorRole {
   EDITOR = 'editor',
