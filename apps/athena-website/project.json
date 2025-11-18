@@ -1,0 +1,20 @@
+{
+  "name": "athena-website",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/athena-website/",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "options": {
+        "outputPath": "dist/apps/athena-website"
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "athena-website:build"
+      }
+    }
+  }
+}
