@@ -1,3 +1,4 @@
+import { Listing } from "src/entities";
 import { ID } from "../../common/datatype.common";
 import { Currency } from "../../enums/currency.enum";
 import { License } from "../../enums/license.enum";
@@ -35,6 +36,9 @@ export interface CreateListingRequest {
   license: License;
 
 }
+
+export type DraftListingRequest = Partial<Listing>;
+
 
 export interface UpdateListingRequest {
   noteId?: ID;

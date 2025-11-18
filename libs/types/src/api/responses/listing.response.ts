@@ -3,7 +3,9 @@ import { ApiResponse } from "../../utils/api-response";
 
 export type CreatedListingResponse = ApiResponse<Listing>;
 
-export type UpdatedListingResponse = Partial<CreatedListingResponse>;
+export type CreatedDraftListingResponse = ApiResponse<Partial<Listing>>;
+
+export type UpdatedListingResponse = ApiResponse<Partial<Listing>>;
 
 export type TakendownListingResponse = CreatedListingResponse;
 
