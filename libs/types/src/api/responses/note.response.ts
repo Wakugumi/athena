@@ -1,4 +1,4 @@
-import { UploadInstructionResponse } from "src/utils/upload-response";
+import { UploadInstructionResponse } from "../../utils/upload-response";
 import { Note, NotePreview } from "../../entities";
 import { ApiResponse } from "../../utils/api-response";
 

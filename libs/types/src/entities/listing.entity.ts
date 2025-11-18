@@ -10,7 +10,7 @@
 import { Currency } from "../enums/currency.enum"; import { License } from "../enums/license.enum";
 import { Visibility } from "../enums/visibility.enum";
 import { ID } from "../common/datatype.common";
-import { ListingStatus } from "src/enums/listing-status.enum";
+import { ListingStatus } from "../enums/listing-status.enum";
 
 export interface ListingItem {
   id: string;
