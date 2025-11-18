@@ -1,21 +1,35 @@
 
-FROM node:25-alpine AS builder
+FROM node:20-alpine AS builder
+
+RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 
 WORKDIR /app
 
-COPY apps/athena-website ./apps/athena-website
+# The root one
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+COPY apps ./apps
 COPY libs ./libs
 
-RUN npx nx build athena-website --configration=production
+RUN pnpm install --frozen-lockfile
 
-FROM node:25-alpine AS runner
+WORKDIR /app/apps/web
+RUN pnpm --filter athena-website build
+
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/public ./public
+RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 
+
+COPY --from=builder /app/apps/athena-website/.next ./.next
+COPY --from=builder /app/apps/athena-website/public ./public
+COPY --from=builder /app/apps/athena-website/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+
+# Expose port
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Run Next.js
+CMD ["pnpm", "start"]
