@@ -3,7 +3,7 @@
 import UserService from "@/api/UserService";
 import { LoginRequest, User } from "@athena/types";
 import { redirect } from "next/navigation";
-import { createContext, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 interface AuthContextProps {
     user: User | null;
@@ -14,7 +14,7 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
     const login = (request: LoginRequest) => {
@@ -35,9 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem("access_token");
-        setUser(null);
-        redirect('/login');
+        UserService.logout().then(() => {
+            localStorage.removeItem("access_token");
+            setUser(null);
+            redirect('/login');
+        }).catch((err) => {
+            throw err;
+        });
     };
 
     const checkAuth = () => {

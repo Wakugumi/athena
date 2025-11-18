@@ -1,4 +1,4 @@
-import { LoginRequest, LoginResponse, SignupRequest, SignupResponse, User } from "@athena/types"
+import { LoginRequest, LoginResponse, SignupRequest, SignupResponse, UpdateProfileRequest, User } from "@athena/types"
 import api from "./api"
 
 export default class UserService {
@@ -14,6 +14,20 @@ export default class UserService {
 
     static async me() {
         return await api.get<User>('/users/me')
+            .then((response) => {
+                return response.data
+            })
+            .catch(error => {
+                throw error
+            })
+    }
+
+    static async logout() {
+        return await api.post('/auth/logout')
+    }
+
+    static async updateProfile(request: UpdateProfileRequest) {
+        return await api.put<User>('/users/me/profile', request)
             .then((response) => {
                 return response.data
             })
