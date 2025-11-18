@@ -1,4 +1,4 @@
-name: Deploy Images to ACR
+name: Deploy Athena Server to ACR
 
 on:
   push:
