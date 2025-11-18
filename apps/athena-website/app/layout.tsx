@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import "flowbite/dist/flowbite.css";
 import { createTheme, ThemeModeScript, ThemeProvider } from "flowbite-react";
 import { AuthProvider } from "@/context/AuthContext";
+import { PopupProvider } from "@/context/PopupContext";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -60,7 +61,9 @@ export default function RootLayout({
         <body>
           <ThemeProvider theme={theme as any}>
             <AuthProvider>
-              {children}
+              <PopupProvider>
+                  {children}
+              </PopupProvider>
             </AuthProvider>
           </ThemeProvider>
         </body>
