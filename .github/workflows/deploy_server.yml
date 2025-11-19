@@ -28,10 +28,11 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build and Push
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/athena-server:${{ github.sha }} -f apps/athena-server/Dockerfile .
-
-      - name: Push Docker image
-        run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/athena-server:${{ github.sha }}
+          IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/athena-server
+          SHA=${{github.sha}}
+          docker build -t $IMAGE:$SHA -f apps/athena-server/Dockerfile .
+          docker push $IMAGE:$SHA
+          docker tag $IMGAE:$SHA $IMAGE:latest
+          docker push $IMAGE:latest
