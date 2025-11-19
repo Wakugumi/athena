@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { AttachmentService } from '../services/attachment.service';
 import { StorageDomain, StorageKeyService, StoragePurpose } from 'src/engine/storage/services/storage-key.service';
@@ -10,7 +10,7 @@ import { FileUploadedEvent } from 'src/engine/storage/events/file-uploaded.event
 export class NoteStorageSubscriber {
   constructor(
     private readonly attachmentService: AttachmentService,
-    private readonly key: StorageKeyService,
+    @Inject(StorageKeyService) private readonly key: StorageKeyService,
   ) { }
 
 
@@ -27,6 +27,7 @@ export class NoteStorageSubscriber {
 
     // Route by prefix
     if (!key.includes(`/${StorageDomain.NOTE}/`)) return;
+    if (purpose !== StoragePurpose.ATTACHMENT) return;
 
 
     await this.attachmentService.attachFileToNote(

@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @QueryHandler(SearchListingQuery)
-export class SearchListing implements IQueryHandler<SearchListingQuery> {
+export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
 
   constructor(@InjectRepository(Listing) private readonly listingRepo: Repository<Listing>) {
   }

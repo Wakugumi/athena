@@ -103,7 +103,7 @@ export class StorageService implements StorageDriver {
 
   async getUrl(
     options: GetUrlOptions & { key: string },
-  ): Promise<string | undefined> {
+  ): Promise<string> {
     const { key, signed, expiresInSeconds } = options;
 
     if (signed && this.driver.getSignedUrl) {
@@ -118,10 +118,8 @@ export class StorageService implements StorageDriver {
     return this.buildPublicUrl(key);
   }
 
-  private buildPublicUrl(key: string): string | undefined {
-    const publicBaseUrl: string | undefined =
-      this.options?.options?.publicBaseUrl;
-    if (!publicBaseUrl) return undefined;
+  private buildPublicUrl(key: string): string {
+    const publicBaseUrl: string = this.options?.options?.publicBaseUrl;
     const normalizedKey = key.replace(/^\/+/, '');
     return `${publicBaseUrl.replace(/\/$/, '')}/${normalizedKey}`;
   }

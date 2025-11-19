@@ -55,7 +55,7 @@ export class Order implements OrderType {
   @JoinColumn({ name: 'escrowId' })
   escrow: Relation<Escrow>
 
-  @Column({ type: 'enum', enum: OrderStatus })
+  @Column({ type: 'enum', enum: OrderStatus, enumName: 'order_status' })
   status: OrderStatus;
 
 

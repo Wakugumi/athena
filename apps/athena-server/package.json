@@ -4,9 +4,9 @@
   "description": "Athena is a marketplace platform for student exchange notes and resources. With unique market scheme, we allow student to submit their notes as supply and giving them tokens for their demand in the market.",
   "homepage": "https://github.com/Wakugumi/athena#readme",
   "scripts": {
-    "start": "nest start",
+    "start": "nest start && tsc-alias -w",
     "start:dev": "nest start --watch",
-    "build": "nest build",
+    "build": "nest build && tsc-alias -p tsconfig.json",
     "lint": "eslint . --ext .ts"
   },
   "private": true,
@@ -41,6 +41,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/cqrs": "^11.0.3",
+    "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
@@ -60,6 +61,8 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.0",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
     "typeorm": "^0.3.27"
   }
 }
