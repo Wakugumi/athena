@@ -16,6 +16,8 @@ RUN pnpm --filter athena-server build
 FROM node:20-alpine
 
 WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 COPY --from=builder /app/dist/ ./dist
 
 EXPOSE 3000
