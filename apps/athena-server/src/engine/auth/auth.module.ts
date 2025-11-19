@@ -14,6 +14,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/core/user/user.entity";
 import { UserModule } from "src/core/user/user.module";
 import { UserProfileService } from "src/core/user/services/user-profile.service";
+import { WalletModule } from "src/core/wallet/wallet.module";
 
 @Module({
   controllers: [AuthController],
@@ -30,7 +31,7 @@ import { UserProfileService } from "src/core/user/services/user-profile.service"
     })
     ,
     inject: [AthenaConfigService]
-  }), UserModule],
+  }), UserModule, WalletModule],
   providers: [UserProfileService, SignupService, AuthService, AuthLocalStrategy, JwtStrategy, TokenAvoidlistService, JwtAuthGuard, LocalAuthGuard]
   ,
   exports: [AuthModule]

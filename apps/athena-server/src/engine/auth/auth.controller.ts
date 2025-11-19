@@ -12,7 +12,7 @@ import { ApiBearerAuth, ApiBody, ApiHeader, ApiHeaders, ApiOperation, ApiTags } 
 
 
 @ApiTags('auth')
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService, private signupService: SignupService) {
 

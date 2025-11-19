@@ -14,6 +14,9 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
 
   async execute(query: SearchListingQuery): Promise<Listing[]> {
     const q = this.listingRepo.createQueryBuilder('x');
+    q.andWhere('x.status = "PUBLISHED"');
+    q.andWhere('x.visibility = "PUBLIC"');
+
 
     if (query.title)
       q.andWhere('x.title ILIKE :title', { title: `${query.title}` });
