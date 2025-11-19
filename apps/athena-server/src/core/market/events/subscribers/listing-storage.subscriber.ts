@@ -12,6 +12,8 @@ import { ListingEvents } from "../../enums/listing-events.enum";
 import { ListingItemReadyEvent } from "../listing-item-ready.event";
 import { ListingStatus } from "@athena/types";
 import { StorageUploadEvent } from "src/engine/storage/types/storage-upload-event.type";
+import { StorageProcessingService } from "src/engine/storage/services/storage-processing.service";
+import { StorageService } from "src/engine/storage/services/storage.service";
 
 
 @Injectable()
@@ -22,20 +24,34 @@ export class ListingStorageSubscriber {
     @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
     @InjectRepository(ListingItem) private readonly listingItemRepo: Repository<ListingItem>,
     private readonly key: StorageKeyService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly storageProcessing: StorageProcessingService,
+    private readonly storage: StorageService
   ) { }
 
 
   @OnEvent(StorageEvents.FILE_UPLOADED)
   async handleListingItem(event: StorageUploadEvent) {
 
-    this.logger.log("Handling Listing Upload Event")
+    this.logger.log(`Handling Listing Upload Event ${event.key}`)
 
-    const { key } = event;
+    let { key } = event;
 
     const keyComponents = this.key.splitKey(key);
 
     if (!key.includes(`/${StorageDomain.LISTING}/`)) return;
+
+    let preview = '**Preview**'
+
+
+    if (key.match(/\.(png|jpg|jpeg|gif)$/)) {
+
+      key = await this.storageProcessing.convertImageToMarkdown(event)
+
+      preview = `![${key}](${this.storage.getUrl({ signed: false, key: key })})`;
+    }
+
+    preview = await this.storageProcessing.generatePreview(key)
 
 
     this.logger.log("Handling Listing Upload Event 2")
@@ -44,10 +60,16 @@ export class ListingStorageSubscriber {
     if (!theListing)
       throw new ListingException("No listing found to handle item", ListingExceptionCode.LISTING_NOT_EXIST);
 
+
+
+
+
     const theItem = this.listingItemRepo.create({
       listingId: theListing.id,
       blobKey: key,
-      title: keyComponents.filename
+      title: keyComponents.filename,
+      preview: preview
+
 
     })
 

@@ -40,6 +40,9 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
     }
 
 
+    q.leftJoinAndSelect('x.seller', 'seller');
+
+
     return await q.getMany()
 
   }

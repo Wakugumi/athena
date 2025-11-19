@@ -20,6 +20,9 @@ export class ListingItem implements IListing {
   @Column()
   blobKey: string;
 
+  @Column({ type: 'text', nullable: true })
+  preview?: string | null
+
   @CreateDateColumn()
   createdAt: string;
 

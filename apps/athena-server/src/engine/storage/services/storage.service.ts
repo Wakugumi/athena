@@ -15,7 +15,7 @@ export class StorageService implements StorageDriver {
     this.driver = storageFactory.getCurrentDriver();
   }
 
-  private splitKey(key: string): { folder: string; name: string } {
+  splitKey(key: string): { folder: string; name: string } {
     const normalized = key.replace(/^\/+|\/+$/g, '');
     const lastSlashIdx = normalized.lastIndexOf('/');
     if (lastSlashIdx === -1) return { folder: '', name: normalized };

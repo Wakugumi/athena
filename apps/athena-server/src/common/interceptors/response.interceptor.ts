@@ -5,12 +5,29 @@ import { Observable, catchError, map, throwError } from 'rxjs';
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   intercept(context: ExecutionContext, next: CallHandler<T>): Observable<ApiResponse<T>> {
+
+    const request = context.switchToHttp().getRequest();
+
+    // Minimal Event Grid validation bypass
+    const isEventGridValidation =
+      request.path.includes('/storage/webhook') &&
+      request.method === 'POST' &&
+      Array.isArray(request.body) &&
+      request.body[0]?.eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent';
+
+
     return next.handle().pipe(
-      map((data) => ({
-        statusCode: context.switchToHttp().getResponse().statusCode ?? HttpStatus.OK,
-        success: true,
-        data: data
-      })), catchError((error) => {
+      map((data) => {
+        if (isEventGridValidation) {
+          return data as any;
+        }
+        return {
+
+          statusCode: context.switchToHttp().getResponse().statusCode ?? HttpStatus.OK,
+          success: true,
+          data: data
+        }
+      }), catchError((error) => {
         const status =
           error instanceof HttpException
             ? error.getStatus()
@@ -20,9 +37,6 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
           error instanceof HttpException
             ? error.message
             : 'Internal server error';
-
-
-
         if (error instanceof BadRequestException) {
           const responseBody = error.getResponse() as any;
           if (responseBody.message && Array.isArray(responseBody.message)) {
