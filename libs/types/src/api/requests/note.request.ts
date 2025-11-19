@@ -1,4 +1,4 @@
-import { ContentTypes } from "src/enums";
+import { ContentTypes } from "../../enums";
 import { ID } from "../../common";
 
 export interface CreateNoteRequest {

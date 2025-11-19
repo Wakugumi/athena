@@ -1,10 +1,17 @@
 {
-  "name": "types",
+  "name": "@athena/types",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
   "dependencies": {
     "tslib": "^2.3.0"
   }

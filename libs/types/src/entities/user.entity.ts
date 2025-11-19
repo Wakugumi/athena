@@ -12,16 +12,16 @@
 
 
 
-import { UUID } from "crypto";
+import { ID } from "../common";
 
 export interface User {
 
 
   // standard fields;
-  id: string | UUID;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
+  id: ID
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
 
 
   // domain specific fields
