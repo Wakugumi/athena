@@ -14,7 +14,7 @@ export class Listing implements IListing {
   @Column()
   sellerId: string;
 
-  @OneToOne(() => User, (user) => user.listings)
+  @ManyToOne(() => User, (user) => user.listings)
   @JoinColumn({ name: 'sellerId' })
   seller: Relation<User>;
 
