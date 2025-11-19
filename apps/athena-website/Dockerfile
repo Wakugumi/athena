@@ -14,6 +14,13 @@ COPY libs ./libs
 RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/apps/athena-website
+
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+ARG NEXT_PUBLIC_APP_NAME
+ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
+
 RUN pnpm --filter athena-website build
 
 FROM node:20-alpine AS runner
