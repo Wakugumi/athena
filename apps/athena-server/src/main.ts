@@ -15,6 +15,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }))
   app.useGlobalInterceptors(new ResponseInterceptor())
 
+  app.enableCors({
+    origin: '*'
+  });
+
   const swagger = new DocumentBuilder().setTitle("Athena API").setVersion("1.0").addBearerAuth({
     type: 'http',
     scheme: 'bearer',
