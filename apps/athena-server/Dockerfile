@@ -20,6 +20,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 COPY --from=builder /app/dist/ ./dist
 COPY --from=builder /app/apps/athena-server/package.json ./package.json
+RUN pnpm install
 
 
 EXPOSE 3000
