@@ -17,6 +17,10 @@ export interface GetUrlOptions {
   expiresInSeconds?: number;
   contentType?: ContentTypes;
   key?: string;
+  /**
+   * Expect a signed url instead public
+   * Use this for write permissions
+   */
   signed?: boolean;
 }
 export interface GetUploadUrlOptions {

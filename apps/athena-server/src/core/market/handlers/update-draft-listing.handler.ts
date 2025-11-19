@@ -9,13 +9,11 @@ export class UpdateDraftListingHandler implements ICommandHandler<UpdateDraftLis
 
 
   async execute(command: UpdateDraftListingCommand): Promise<Partial<Listing>> {
-    await this.listingService.ensureUserOwnsListing(command.listingId, command.userId);
+    console.log("handle command update lsting", command.listingId)
+    await this.listingService.ensureUserOwnsListing(command.userId, command.listingId);
 
 
-    const draft = await this.listingService.draftListing({
-      id: command.listingId,
-      ...command.payload
-    })
+    const draft = await this.listingService.updateDraft(command.listingId, command.payload)
 
     return draft
 

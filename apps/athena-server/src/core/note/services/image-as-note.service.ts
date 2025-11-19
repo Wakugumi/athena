@@ -4,7 +4,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Note } from "../entities/note.entity";
 import { ContentTypes } from "src/engine/storage/types/storage.types";
 import { StorageService } from "src/engine/storage/services/storage.service";
-import { SigedUrlPermission } from "src/engine/storage/types/storage-driver.interface";
 import { NoteAttachment } from "../entities/note-attachment.entity";
 
 /**
@@ -23,8 +22,9 @@ export class ImageAsNoteService {
     const key = this.attachmentService.generateFileKey(userId, mimeType)
     const url = await this.storageService.getUrl({
       key: key,
-      permissions: [SigedUrlPermission.WRITE],
       contentType: mimeType
+      ,
+      signed: true
     })
 
 

@@ -5,11 +5,9 @@ import { Request as RequestContext } from "express";
 import { JwtAuthGuard } from "./guards/auth-jwt.guard";
 import { SignupPayload } from "./dtos/signup.input";
 import { SignupService } from "./services/signup.service";
-import { CustomExceptionFilter } from "src/utils/exception.filter";
 import { User } from "src/core/user/user.entity";
-import { LoginPayload } from "./dtos/login.input";
+import { LoginDto } from "./dtos/login.input";
 import { ApiBearerAuth, ApiBody, ApiHeader, ApiHeaders, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { AuthRoutes } from '@athena/routes'
 
 
 
@@ -21,25 +19,24 @@ export class AuthController {
   }
 
 
-  @Post(AuthRoutes.LOGIN)
+  @Post('login')
   @UsePipes(new ValidationPipe())
   @UseGuards(LocalAuthGuard)
   @ApiOperation({ 'summary': 'user login with username and password' })
-  @ApiBody({ type: LoginPayload })
-  async login(@Body() _: LoginPayload, @Request() req: RequestContext) {
+  async login(@Body() _: LoginDto, @Request() req: RequestContext) {
 
     return this.authService.login(req.user as User)
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Get(AuthRoutes.ME)
+  @Get('me')
   async me(@Request() req: RequestContext) {
     return req.user
 
   }
 
-  @Post(AuthRoutes.SIGNUP)
+  @Post('signup')
   @UsePipes(new ValidationPipe())
   async signup(@Body() payload: SignupPayload) {
     return this.signupService.signup(payload)
@@ -48,7 +45,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @ApiHeaders([])
-  @Post(AuthRoutes.LOGOUT)
+  @Post('logout')
   async logout(@Request() req: RequestContext, @Headers('authorization') authorization?: string): Promise<{ success: boolean }> {
     if (!authorization) return { success: false }
     const token = authorization.slice(7)

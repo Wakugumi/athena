@@ -2,13 +2,12 @@ import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Wallet } from "../entities/wallet.entity";
 import { Repository } from "typeorm";
-import { TokenLedger } from "../entities/token-ledger.entity";
 import { FindWalletLedgersDTO } from "../dtos/wallet-history.input";
-import { query } from "express";
 import { WalletException, WalletExceptionCode } from "../wallet.exception";
 import { WalletOwnerType } from "@athena/types";
 import { User } from "src/core/user/user.entity";
 import { Order } from "src/core/market/entities/order.entity";
+import { TokenLedger } from "src/core/ledger/entities/token-ledger.entity";
 
 @Injectable()
 export class WalletService {

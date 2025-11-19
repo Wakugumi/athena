@@ -51,7 +51,7 @@ export interface NoteAttachment {
   originalFilename: string;
   contentType: string;
   size: number;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export enum CollaboratorRole {

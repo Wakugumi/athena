@@ -9,7 +9,7 @@ export class Escrow implements IEscrow {
   id: string;
 
 
-  @PrimaryColumn()
+  @Column()
   orderId: string;
 
   @OneToOne(() => Order, { onDelete: 'CASCADE' })
@@ -20,12 +20,12 @@ export class Escrow implements IEscrow {
   @Column({ type: 'decimal', precision: 18, scale: 2 })
   amount: number;
 
-  @Column({ type: 'enum', enum: EscrowStatus })
+  @Column({ type: 'enum', enum: EscrowStatus, enumName: "escrow_status" })
   status: EscrowStatus;
 
 
   @Column({ type: 'date', nullable: true })
-  holdUntil?: string | undefined;
+  holdUntil?: string | null;
 
   @CreateDateColumn()
   createdAt: string;

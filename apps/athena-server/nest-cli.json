@@ -2,7 +2,11 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
+  "root": "apps/athena-server",
+  "entryFile": "apps/athena-server/src/main",
   "compilerOptions": {
-    "deleteOutDir": true
+    "tsConfigPath": "./tsconfig.build.json",
+    "deleteOutDir": true,
+    "watchAssets": true
   }
 }

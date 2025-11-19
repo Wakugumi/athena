@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { Escrow } from "../entities/escrow.entity";
 import { Injectable } from "@nestjs/common";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { InjectDataSource } from "@nestjs/typeorm";
 import { EscrowStatus, TokenLedgerReferenceType, TokenLedgerType, WalletOwnerType } from "@athena/types";
 import { WalletService } from "src/core/wallet/services/wallet.service";
 import { LedgerService } from "src/core/ledger/services/ledger.service";

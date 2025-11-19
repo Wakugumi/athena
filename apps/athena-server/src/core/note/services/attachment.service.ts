@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { StorageService } from "src/engine/storage/services/storage.service";
-import { SigedUrlPermission } from "src/engine/storage/types/storage-driver.interface";
 import { ContentTypes } from "src/engine/storage/types/storage.types";
 import { Note } from "../entities/note.entity";
 import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
@@ -34,7 +33,6 @@ export class AttachmentService {
   async getUploadUrl(userId: string, mimeType: ContentTypes) {
     const key = this.generateFileKey(userId, mimeType);
     const url = await this.storageService.getUrl({
-      permissions: [SigedUrlPermission.WRITE],
       contentType: mimeType,
       key: key,
     })
@@ -45,7 +43,7 @@ export class AttachmentService {
   }
 
   getPublicUrl(fileKey: string) {
-    return this.storageService.getPublicUrl({ key: fileKey })
+    return this.storageService.getUrl({ key: fileKey })
   }
 
 

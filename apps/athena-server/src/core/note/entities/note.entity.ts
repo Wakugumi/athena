@@ -1,6 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
 import { AIMetadata, Collaborator, Note as NoteType } from '@athena/types'
-import { ListingItem } from "src/core/market/entities/listing-item.entity";
 import { NoteAttachment } from "./note-attachment.entity";
 
 @Entity('note')
@@ -51,19 +50,4 @@ export class Note implements NoteType {
 
   @Column()
   ownerId: string;
-
-  @Column({ type: 'jsonb', array: true })
-  collaborators?: Collaborator[] | undefined;
-
-  @Column({ type: 'jsonb' })
-  aiMetadata?: AIMetadata | undefined;
-
-
-
-  @OneToMany(() => ListingItem, (x) => x.note)
-  listingItems: Relation<ListingItem[]>
-
-
-
-
 }

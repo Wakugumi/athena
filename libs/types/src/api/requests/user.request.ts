@@ -33,7 +33,7 @@ export interface UpdateProfileRequest {
 }
 
 export interface UpdateAvatarRequest {
-  blob: Blob | File | Base64URLString;
+  blob: Blob | File
 }
 
 /**

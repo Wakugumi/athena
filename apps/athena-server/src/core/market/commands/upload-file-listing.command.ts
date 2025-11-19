@@ -12,7 +12,7 @@ export class UploadFileListingCommand extends Command<{
     public readonly userId: string,
     public readonly contentType: ContentTypes,
     public readonly size: number,
-    public readonly listingId?: string,
+    public readonly listingId?: string | null,
   ) {
 
     super();

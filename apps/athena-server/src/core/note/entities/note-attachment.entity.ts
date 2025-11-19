@@ -1,13 +1,18 @@
-import { ContentTypes, NoteAttachment as INoteAttachment } from "@athena/types";
-import { Column, CreateDateColumn, ForeignKey, OneToOne, PrimaryGeneratedColumn, Relation } from "typeorm";
+import { NoteAttachment as INoteAttachment } from "@athena/types";
+import { Column, CreateDateColumn, Entity, ForeignKey, Index, OneToOne, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { Note } from "./note.entity";
+import { ContentTypes } from "src/engine/storage/types/storage.types";
 
+@Entity('attachment')
+@Index('UQ_ATTACHMENT_KEY', ['key'], { unique: true })
 export class NoteAttachment implements INoteAttachment {
+
+
   @PrimaryGeneratedColumn()
   id: string;
 
 
-  @Column({ type: 'enum', enum: ContentTypes })
+  @Column({ type: 'enum', enum: ContentTypes, enumName: "content_types" })
   contentType: ContentTypes;
 
   @Column()
@@ -20,7 +25,6 @@ export class NoteAttachment implements INoteAttachment {
   note: Relation<Note>;
 
 
-
   @Column()
   size: number;
 
@@ -31,6 +35,6 @@ export class NoteAttachment implements INoteAttachment {
   url: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: string;
 
 }
