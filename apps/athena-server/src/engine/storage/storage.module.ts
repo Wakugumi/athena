@@ -6,7 +6,6 @@ import { STORAGE_OPTIONS, STORAGE_STRATEGY, STORAGE_WEBHOOK_ADAPTER_AZURE } from
 import { AthenaConfigModule } from '../athena-config/athena-config.module';
 import { AthenaConfigService } from '../athena-config/athena-config.service';
 import { StorageKeyService } from './services/storage-key.service';
-import { StorageWebhookRouterService } from './services/storage-webhook-router.service';
 import { StorageWebhookController } from './controllers/storage-webhook.controller';
 import { AzureWebhookAdapter } from './webhook-adapters/azure-webhook.adapter';
 
@@ -40,12 +39,8 @@ export class StorageModule {
             config.get('STORAGE_TYPE'),
           inject: [AthenaConfigService],
         },
-        {
-          provide: STORAGE_WEBHOOK_ADAPTER_AZURE,
-          useClass: AzureWebhookAdapter
-        },
         StorageService,
-        StorageWebhookRouterService,
+        AzureWebhookAdapter
       ],
       controllers: [StorageTestController, StorageWebhookController],
       exports: [StorageService, StorageKeyService],

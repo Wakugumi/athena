@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { Listing } from "../../entities/listing.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -11,10 +11,12 @@ import { ListingItem } from "../../entities/listing-item.entity";
 import { ListingEvents } from "../../enums/listing-events.enum";
 import { ListingItemReadyEvent } from "../listing-item-ready.event";
 import { ListingStatus } from "@athena/types";
+import { StorageUploadEvent } from "src/engine/storage/types/storage-upload-event.type";
 
 
 @Injectable()
 export class ListingStorageSubscriber {
+  private logger = new Logger(ListingStorageSubscriber.name)
 
   constructor(
     @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
@@ -25,15 +27,18 @@ export class ListingStorageSubscriber {
 
 
   @OnEvent(StorageEvents.FILE_UPLOADED)
-  async handleListingItem(event: FileUploadedEvent) {
+  async handleListingItem(event: StorageUploadEvent) {
 
+    this.logger.log("Handling Listing Upload Event")
 
-    const { key } = event.payload;
+    const { key } = event;
 
     const keyComponents = this.key.splitKey(key);
 
     if (!key.includes(`/${StorageDomain.LISTING}/`)) return;
 
+
+    this.logger.log("Handling Listing Upload Event 2")
     const theListing = await this.listingRepo.preload({ id: keyComponents.ownerId });
 
     if (!theListing)

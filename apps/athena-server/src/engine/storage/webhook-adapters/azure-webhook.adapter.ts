@@ -1,42 +1,86 @@
 
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  AzureEventGridEnvelope,
-  AzureBlobCreatedEvent,
-} from '../types/azure-event-grid.types'
-import { StorageWebhookAdapter } from './storage-webhook-adapter.interface';
+import { AzureEventGridEvent } from '../types/azure-event-grid.types';
 import { StorageUploadEvent } from '../types/storage-upload-event.type';
 import { StorageDriverOptions } from '../types/storage.types';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { StorageEvents } from '../enums/storage-events.enum';
 
 @Injectable()
-export class AzureWebhookAdapter implements StorageWebhookAdapter {
+export class AzureWebhookAdapter {
   private readonly logger = new Logger(AzureWebhookAdapter.name);
 
-  supports(provider: string): boolean {
-    return provider === StorageDriverOptions.AZURE;
+  constructor(private readonly eventEmitter: EventEmitter2) { }
+  /**
+   * Handle raw Event Grid events
+   */
+  handleEvent(event: AzureEventGridEvent) {
+    try {
+      const normalized = this.normalizeEvent(event);
+      if (normalized) {
+        this.processUpload(normalized);
+      }
+    } catch (err) {
+      this.logger.error('Failed to handle event', err);
+    }
   }
 
-  normalize(payload: unknown): StorageUploadEvent {
-    const events = payload as AzureEventGridEnvelope[];
+  /**
+   * Normalize Event Grid / Azure Storage event to common format
+   */
+  private normalizeEvent(event: AzureEventGridEvent): StorageUploadEvent | null {
+    if (!event || !event.data) return null;
 
-    // Azure always sends an array of events, but we normalize ONE.
-    // Your controller should loop if needed.
-    const event = events[0];
+    switch (event.eventType) {
+      case 'Microsoft.Storage.BlobCreated':
+      case 'Microsoft.Storage.BlobDeleted': {
+        const url = event.data.url; // full blob URL
+        const subject = event.subject; // optional fallback
 
-    const data = event.data as AzureBlobCreatedEvent;
+        // Extract bucket (container)
+        let bucket = '';
+        let key = '';
 
-    const url = new URL(data.url);
-    const key = url.pathname.replace(/^\//, '');
-    const bucket = url.host.split('.')[0]; // "<container>.blob.core…" → container name
+        if (url) {
+          const urlParts = new URL(url);
+          const pathSegments = urlParts.pathname.split('/').filter(Boolean); // removes empty segments
+          bucket = pathSegments[0]; // first segment is container
+          key = pathSegments.slice(1).join('/'); // remaining is blob key
+        } else if (subject) {
+          const parts = subject.split('/blobs/');
+          if (parts.length === 2) {
+            key = parts[1];
+            const containerMatch = parts[0].match(/containers\/([^\/]+)/);
+            if (containerMatch) {
+              bucket = containerMatch[1];
+            }
+          }
+        }
 
-    return {
-      provider: StorageDriverOptions.AZURE,
-      bucket,
-      key,
-      size: data.contentLength ?? 0,
-      contentType: data.contentType ?? 'application/octet-stream',
-      uploadedAt: new Date(event.eventTime),
-      raw: payload,
-    };
+        return {
+          provider: StorageDriverOptions.AZURE,
+          bucket,
+          key,
+          size: event.data.contentLength,
+          contentType: event.data.contentType,
+        };
+      }
+
+      default:
+        this.logger.warn(`Unhandled event type: ${event.eventType}`);
+        return null;
+    }
+  }
+
+  /**
+   * Process normalized upload event
+   */
+  private processUpload(event: StorageUploadEvent) {
+    this.logger.log(
+      `Received ${event.provider} event for bucket=${event.bucket} key=${event.key}`,
+    );
+    this.eventEmitter.emit(StorageEvents.FILE_UPLOADED, event)
+
+
   }
 }

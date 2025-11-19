@@ -1,12 +1,16 @@
 
-export interface AzureEventGridEnvelope {
+
+export interface AzureEventGridEvent<T = any> {
   id: string;
   eventType: string;
-  eventTime: string;
+  /**
+   * split by /blobs/<key>
+  */
   subject: string;
+  eventTime: string;
+  data: T;
   dataVersion: string;
   metadataVersion: string;
-  data: unknown;
 }
 
 export interface AzureBlobCreatedEvent {
