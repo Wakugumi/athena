@@ -1,4 +1,4 @@
-import { IsEmail, IsString, Matches } from "class-validator";
+import { IsEmail, IsOptional, IsString, Matches } from "class-validator";
 import { PASSWORD_REGEX, USERNAME_REGEX } from "../utils/auth.util";
 import { ApiProperty } from "@nestjs/swagger";
 import { SignupRequest } from "@athena/types";
@@ -16,7 +16,9 @@ export class SignupPayload implements SignupRequest {
 
   @ApiProperty()
   @IsString()
+  @IsOptional()
   displayName?: string | null;
+
 
   @ApiProperty()
   @IsString()

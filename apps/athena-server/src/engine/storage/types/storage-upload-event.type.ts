@@ -6,10 +6,8 @@ export class StorageUploadEvent {
     public readonly provider: StorageDriverOptions,
     public readonly bucket: string,
     public readonly key: string,
-    public readonly size: number,
-    public readonly contentType: string,
-    public readonly uploadedAt: Date,
-    public readonly raw: unknown
+    public readonly size?: number,
+    public readonly contentType?: string,
 
   ) { }
 

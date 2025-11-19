@@ -20,12 +20,13 @@ import { StorageModule } from "src/engine/storage/storage.module";
 import { WalletModule } from "../wallet/wallet.module";
 import { LedgerModule } from "../ledger/ledger.module";
 import { ListingItem } from "./entities/listing-item.entity";
+import { ListingStorageSubscriber } from "./events/subscribers/listing-storage.subscriber";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, Listing, Order, ListingItem]), StorageModule, WalletModule, LedgerModule],
   controllers: [OrderController, ListingController],
   providers: [EscrowService, ListingService, OrderService, OrderOwnersipService,
-    CreateDraftListingHandler, CreateOrderHandler, ProcessOrderHandler, PublishListingHandler, SearchListingHandler, UpdateDraftListingHandler, UploadFileListingHandler
+    CreateDraftListingHandler, CreateOrderHandler, ProcessOrderHandler, PublishListingHandler, SearchListingHandler, UpdateDraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber
   ],
   exports: [TypeOrmModule]
 })

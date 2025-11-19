@@ -5,6 +5,7 @@ import { AttachmentService } from '../services/attachment.service';
 import { StorageDomain, StorageKeyService, StoragePurpose } from 'src/engine/storage/services/storage-key.service';
 import { StorageEvents } from 'src/engine/storage/enums/storage-events.enum';
 import { FileUploadedEvent } from 'src/engine/storage/events/file-uploaded.event';
+import { StorageUploadEvent } from 'src/engine/storage/types/storage-upload-event.type';
 
 @Injectable()
 export class NoteStorageSubscriber {
@@ -19,8 +20,8 @@ export class NoteStorageSubscriber {
   * Handle attachment record when file is uploaded
   */
   @OnEvent(StorageEvents.FILE_UPLOADED)
-  async handleNoteAttachment(event: FileUploadedEvent) {
-    const { key } = event.payload;
+  async handleNoteAttachment(event: StorageUploadEvent) {
+    const { key } = event;
 
 
     const { domain, ownerId, purpose, extension, filename } = this.key.splitKey(key);

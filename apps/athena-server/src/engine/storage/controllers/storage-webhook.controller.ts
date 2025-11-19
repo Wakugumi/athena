@@ -1,28 +1,31 @@
 
-import { Controller, Post, Body, Query, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { StorageWebhookRouterService } from '../services/storage-webhook-router.service';
-import { FileUploadedEvent } from '../events/file-uploaded.event';
-import { StorageEvents } from '../enums/storage-events.enum';
+import { Controller, Post, Body, Query, Logger, HttpCode } from '@nestjs/common';
+import { AzureEventGridEvent } from '../types/azure-event-grid.types';
+import { AzureWebhookAdapter } from '../webhook-adapters/azure-webhook.adapter';
 
 @Controller('storage/webhook')
 export class StorageWebhookController {
   constructor(
-    private readonly router: StorageWebhookRouterService,
-    private readonly eventEmitter: EventEmitter2,
+    private readonly adapter: AzureWebhookAdapter
   ) { }
 
-  @Post()
-  handleWebhook(
-    @Query('provider') provider: string,
-    @Body() payload: unknown,
-  ) {
-    const normalized = this.router.route(provider, payload);
 
-    this.eventEmitter.emit(
-      StorageEvents.FILE_UPLOADED,
-      new FileUploadedEvent(normalized),
-    );
+  @Post('webhook')
+  @HttpCode(200) // Always return 200 to Event Grid
+  async handleWebhook(@Body() events: AzureEventGridEvent[]) {
+    if (!Array.isArray(events) || events.length === 0) return;
+
+    for (const event of events) {
+      // Handle Subscription Validation
+      if (event.eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent') {
+        return {
+          validationResponse: event.data.validationCode,
+        };
+      }
+
+      // Normal events
+      this.adapter.handleEvent(event)
+    }
 
     return { status: 'ok' };
   }
