@@ -4,6 +4,8 @@ import { UUID } from "crypto";
 import { IsEmail, Matches } from "class-validator";
 import { USERNAME_REGEX } from "src/engine/auth/utils/auth.util";
 import { Wallet } from "../wallet/entities/wallet.entity";
+import { Order } from "../market/entities/order.entity";
+import { Listing } from "../market/entities/listing.entity";
 
 @Entity('user')
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
@@ -39,24 +41,25 @@ export class User implements SharedUser {
   passwordHash: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: string;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  deletedAt: string;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: string;
 
-  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  @OneToOne(() => Wallet, (wallet) => wallet.owner)
   wallet: Relation<Wallet>
 
-  @OneToMany(() => Transaction, (transaction) => transaction.buyer)
-  buyTransactions: Relation<Transaction[]>
+  @OneToMany(() => Order, (transaction) => transaction.buyer)
+  buyTransactions: Relation<Order[]>;
 
 
-  @OneToMany(() => Transaction, (transaction) => transaction.seller)
-  sellTransactions: Relation<Transaction[]>
+  @OneToMany(() => Order, (transaction) => transaction.seller)
+  sellTransactions: Relation<Order[]>;
 
-
+  @OneToMany(() => Listing, (listing) => listing.seller)
+  listings: Relation<Listing[]>
 
 }

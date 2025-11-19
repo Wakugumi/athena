@@ -1,6 +1,5 @@
-import { Body, Controller, Post, Sse, UseGuards } from "@nestjs/common"
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSchema } from "@nestjs/swagger";
-import { Observable } from "rxjs";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common"
+import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { CurrentUser } from "src/engine/auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
 import { User } from "../user/user.entity";
@@ -12,11 +11,6 @@ import { CreatePhotonoteDto } from "./dtos/create-photonote.input";
 @Controller('note')
 export class NoteController {
   constructor(private commandBus: CommandBus) { }
-
-  @Sse('sse')
-  sse(): Observable<MessageEvent> {
-
-  }
 
 
   @Post('photonote/create')

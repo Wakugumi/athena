@@ -1,14 +1,13 @@
-import { Body, Controller, Get, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { SearchListingQuery } from "../queries/search-listing.query";
-import { ApiBearerAuth, ApiBody, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
-import { CreateDraftListingDTO } from "../dtos/create-draft.input";
 import { CreateDraftListingCommand } from "../commands/create-draft-listing.command";
 import { CurrentUser } from "src/engine/auth/decorators/current-user.decorator";
 import { User } from "src/core/user/user.entity";
 import { Listing } from "../entities/listing.entity";
-import { UpdateListingDto } from "../dtos/update-listing.dto";
+import { UpdateDraftListingDto } from "../dtos/update-listing.dto";
 import { UpdateDraftListingCommand } from "../commands/update-draft-listing.command";
 import { PublishListingRequest } from "@athena/types";
 import { PublishListingCommand } from "../commands/publish-listing.command";
@@ -17,6 +16,7 @@ import { UploadFileListingCommand } from "../commands/upload-file-listing.comman
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
+@UsePipes(new ValidationPipe())
 export class ListingController {
 
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) { }
@@ -36,6 +36,9 @@ export class ListingController {
 
   @Post('draft')
   @ApiBearerAuth()
+  @ApiOperation({
+    summary: "Request to create new draft", description: "Request create draft listing, will create new record of Listing marked as draft, then return as response"
+  })
   async draft(@CurrentUser() user: User): Promise<Partial<Listing>> {
     return await this.commandBus.execute<CreateDraftListingCommand>(
       new CreateDraftListingCommand(user.id)
@@ -45,10 +48,10 @@ export class ListingController {
 
   @Put('draft')
   @ApiBearerAuth()
-  @ApiBody({ type: UpdateListingDto })
-  async updateDraft(@CurrentUser() user: User, @Body() payload: UpdateListingDto): Promise<Partial<Listing>> {
+  @ApiOperation({ summary: "Update draft", description: "Update listing draft" })
+  async updateDraft(@CurrentUser() user: User, @Body() payload: UpdateDraftListingDto): Promise<Partial<Listing>> {
     return await this.commandBus.execute<UpdateDraftListingCommand>(
-      new UpdateDraftListingCommand(payload.id, user.id, payload as Partial<Listing>)
+      new UpdateDraftListingCommand(payload.id, user.id, payload as Partial<Omit<Listing, "id">>)
 
     )
   }

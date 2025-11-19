@@ -216,7 +216,7 @@ export class AzureDriver implements StorageDriver {
       const sasOptions = {
         containerName: this.options.container,
         blobName: filePath,
-        permissions: BlobSASPermissions.parse('r'), // read permission
+        permissions: BlobSASPermissions.parse('w'), // read permission
         startsOn: new Date(),
         expiresOn,
       };

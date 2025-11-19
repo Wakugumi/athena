@@ -52,7 +52,6 @@ export class UploadFileListingHandler implements ICommandHandler<UploadFileListi
         listingId: existingListing.id,
         mimeType: command.contentType,
         size: command.size,
-        originalFilename: command.originalFilename
       }
     )
 

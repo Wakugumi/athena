@@ -110,7 +110,7 @@ export interface Escrow {
   orderId: ID;
   amount: number;
   status: EscrowStatus
-  holdUntil?: string;
+  holdUntil?: string | null;
   createdAt: string;
   updatedAt: string;
 }

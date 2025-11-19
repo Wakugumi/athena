@@ -83,8 +83,8 @@ export interface Listing {
 
   createdAt: string;
   updatedAt: string;
-  publishedAt?: string;
-  archivedAt?: string;
-  removedAt?: string
+  publishedAt?: string | null;
+  archivedAt?: string | null;
+  removedAt?: string | null
 }
 

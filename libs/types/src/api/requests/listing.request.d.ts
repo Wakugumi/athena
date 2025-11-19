@@ -1,0 +1,27 @@
+import { Listing } from "../../entities";
+import { ID } from "../../common/datatype.common";
+import { Currency } from "../../enums/currency.enum";
+import { License } from "../../enums/license.enum";
+import { ContentTypes, Visibility } from "../../enums";
+export type DraftListingRequest = Partial<Listing>;
+export interface UpdateListingRequest {
+    id: string;
+    title?: string | null;
+    currency?: Currency | null;
+    price?: number | null;
+    license?: License | null;
+    description?: string | null;
+    visibility?: Visibility | null;
+    summary?: string | null;
+}
+export interface TakedownListingRequest {
+    id: ID;
+}
+export interface PublishListingRequest {
+    id: ID;
+}
+export interface UploadFileDraftListingRequest {
+    contentType: ContentTypes;
+    size: number;
+    listingId?: string | null;
+}

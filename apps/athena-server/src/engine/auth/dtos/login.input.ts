@@ -1,13 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, Matches } from "class-validator";
-import { PASSWORD_REGEX } from "../utils/auth.util";
 import { LoginRequest } from "@athena/types";
+import { PASSWORD_REGEX } from "../utils/auth.util";
 
-export class LoginPayload implements LoginRequest {
+export class LoginDto implements LoginRequest {
   @ApiProperty()
   @IsString()
   username: string;
 
   @ApiProperty()
+  @Matches(PASSWORD_REGEX)
   password: string;
 }

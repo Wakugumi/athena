@@ -1,20 +1,19 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource, DeepPartial } from "typeorm";
-import { Listing, ListingStatus } from "../entities/listing.entity";
+import { Listing } from "../entities/listing.entity";
 import { ListingItem } from "../entities/listing-item.entity";
-import { ContentTypes, Currency, License, Visibility } from "@athena/types";
+import { ContentTypes, Currency, License, ListingStatus, Visibility } from "@athena/types";
 import { ListingException, ListingExceptionCode } from "../exceptions/listing.exception";
 import { ImageAsNoteService } from "src/core/note/services/image-as-note.service";
 import { StorageService } from "src/engine/storage/services/storage.service";
 import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
 import { resolveFileExtension } from "src/engine/storage/utils/resolve-file-extension.util";
-import { SigedUrlPermission } from "src/engine/storage/types/storage-driver.interface";
 
 @Injectable()
 export class ListingService {
 
-  constructor(private readonly imageAsNoteService: ImageAsNoteService,
+  constructor(
     @InjectDataSource() private readonly datasource: DataSource,
     private readonly storageService: StorageService,
     private readonly storageKeyService: StorageKeyService) { }
@@ -26,7 +25,15 @@ export class ListingService {
 
 
   async ensureUserOwnsListing(userId: string, listingId: string) {
-    await this.datasource.manager.findOneByOrFail(Listing, { id: listingId, sellerId: userId })
+    const found = await this.datasource.manager.findOneBy(Listing, { id: listingId })
+    if (found?.sellerId != userId)
+      throw new ListingException("Listing and User not match", ListingExceptionCode.LISTING_UNAUTHORIZED, "User do not own this Listing", HttpStatus.UNAUTHORIZED)
+  }
+
+  async ensureDraft(listingId: string) {
+    const found = await this.datasource.manager.findOneBy(Listing, { id: listingId })
+    if (found?.status != ListingStatus.DRAFT || found.visibility !== Visibility.DRAFT)
+      throw new ListingException("Cannot edit publised draft", ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Cannot update Listing that is not in draft state", HttpStatus.BAD_REQUEST)
   }
 
 
@@ -34,8 +41,18 @@ export class ListingService {
     return this.datasource.manager.save(Listing, {
       ...payload,
       visibility: Visibility.DRAFT,
-      status: ListingStatus.DRAFT
+      status: ListingStatus.DRAFT,
     });
+  }
+
+  async updateDraft(listingId: string, payload: DeepPartial<Omit<Listing, "id">>): Promise<Partial<Listing>> {
+    payload = Object.fromEntries(
+      Object.entries(payload).filter(([_, v]) => v !== undefined && v !== null)
+    );
+    console.log("updating draft", listingId)
+    await this.datasource.manager.update(Listing, listingId, payload)
+
+    return await this.datasource.manager.findOneBy(Listing, { id: listingId }) as Partial<Listing>
   }
 
   async publishListing(listingId: string) {
@@ -73,9 +90,8 @@ export class ListingService {
 
     const url = await this.storageService.getUrl({
       key: key,
-      permissions: [SigedUrlPermission.WRITE],
       contentType: params.mimeType,
-
+      signed: true
     })
 
     return { key, url }

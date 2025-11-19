@@ -2,17 +2,23 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { StorageService } from './services/storage.service';
 import { StorageTestController } from './controllers/test.controller';
 import { StorageDriverFactory } from './storage-driver.factory';
-import { STORAGE_OPTIONS, STORAGE_STRATEGY } from './types/storage.tokens';
+import { STORAGE_OPTIONS, STORAGE_STRATEGY, STORAGE_WEBHOOK_ADAPTER_AZURE } from './types/storage.tokens';
 import { AthenaConfigModule } from '../athena-config/athena-config.module';
 import { AthenaConfigService } from '../athena-config/athena-config.service';
-@Global()
+import { StorageKeyService } from './services/storage-key.service';
+import { StorageWebhookRouterService } from './services/storage-webhook-router.service';
+import { StorageWebhookController } from './controllers/storage-webhook.controller';
+import { AzureWebhookAdapter } from './webhook-adapters/azure-webhook.adapter';
 
+@Global()
+@Module({})
 export class StorageModule {
   static forRoot(): DynamicModule {
     return {
       module: StorageModule,
       imports: [AthenaConfigModule],
       providers: [
+        StorageKeyService,
         StorageDriverFactory,
         // provide STORAGE_OPTIONS token so StorageService can inject configuration
         {
@@ -34,10 +40,15 @@ export class StorageModule {
             config.get('STORAGE_TYPE'),
           inject: [AthenaConfigService],
         },
+        {
+          provide: STORAGE_WEBHOOK_ADAPTER_AZURE,
+          useClass: AzureWebhookAdapter
+        },
         StorageService,
+        StorageWebhookRouterService,
       ],
-      controllers: [StorageTestController],
-      exports: [StorageService],
+      controllers: [StorageTestController, StorageWebhookController],
+      exports: [StorageService, StorageKeyService],
     };
   }
 }
