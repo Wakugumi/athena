@@ -9,10 +9,11 @@ import { UserModule } from "../user/user.module";
 import { Order } from "../market/entities/order.entity";
 import { LedgerModule } from "../ledger/ledger.module";
 import { WalletController } from "./controllers/wallet.controller";
+import { FetchWalletHandler } from "./handlers/fetch-wallet.handler";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Wallet, TokenLedger, Order]), UserModule, LedgerModule],
-  providers: [WalletService, UserWalletService],
+  providers: [WalletService, UserWalletService, FetchWalletHandler],
   controllers: [WalletController],
   exports: [TypeOrmModule, WalletService, UserWalletService]
 })

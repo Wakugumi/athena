@@ -8,6 +8,7 @@ import { hashPassword } from "../utils/auth.util";
 import { UserProfileService } from "src/core/user/services/user-profile.service";
 import { WalletService } from "src/core/wallet/services/wallet.service";
 import { WalletOwnerType } from "@athena/types";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class SignupService {
@@ -15,7 +16,8 @@ export class SignupService {
   constructor(
     private readonly profileService: UserProfileService,
     @InjectDataSource() private datasource: DataSource,
-    private readonly wallet: WalletService) { }
+    private readonly wallet: WalletService,
+    private readonly eventEmitter: EventEmitter2) { }
 
 
   async signup(payload: SignupPayload) {
@@ -49,10 +51,15 @@ export class SignupService {
         displayName: payload.displayName ?? payload.username,
         passwordHash: await hashPassword(payload.password)
       });
+      const savedUser = await manager.save(User, newUser);
 
-      await this.wallet.createWallet(newUser.id, WalletOwnerType.USER)
+      await this.wallet.createWallet(savedUser.id, WalletOwnerType.USER)
 
-      return await manager.save(User, newUser);
+      /**
+       * TODO: fire event on signup
+        */
+      return savedUser;
+
     })
 
 
