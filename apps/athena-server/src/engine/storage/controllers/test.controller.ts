@@ -18,7 +18,7 @@ import {
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '../services/storage.service';
-import { ApiBody, ApiProperty } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiProperty } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
 
 class UploadBase64Dto {
@@ -50,28 +50,47 @@ export class StorageTestController {
       name: normalized.substring(lastSlashIdx + 1),
     };
   }
-
-  // multipart/form-data upload (field name: file)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a file with a storage key',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        key: {
+          type: 'string',
+          description: 'The storage/blob key to store the file under',
+        },
+      },
+      required: ['file', 'key'],
+    },
+  })
   async uploadMultipart(
     @UploadedFile() file: any,
-    @Body('folder') folder?: string,
+    @Body('key') key: string,
   ) {
     if (!file) throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
+    if (!key) throw new HttpException('No key provided', HttpStatus.BAD_REQUEST);
 
     try {
       const result = await this.storageService.write({
         file: file.buffer,
-        name: file.originalname,
-        folder: folder || '',
-        mimeType: (file.mimetype as any) || undefined,
+        name: key,          // Use the key as the storage name
+        folder: '',         // optional, if you still want folder logic
+        mimeType: file.mimetype || undefined,
       });
       return { success: true, result };
     } catch (err) {
       throw new HttpException((err as any)?.message || String(err), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
 
   // JSON base64 upload
   @Post('upload/base64')
