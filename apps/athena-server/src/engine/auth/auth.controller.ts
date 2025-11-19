@@ -28,13 +28,6 @@ export class AuthController {
     return this.authService.login(req.user as User)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  async me(@Request() req: RequestContext) {
-    return req.user
-
-  }
 
   @Post('signup')
   @UsePipes(new ValidationPipe())

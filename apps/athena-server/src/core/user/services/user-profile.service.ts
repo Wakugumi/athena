@@ -4,6 +4,7 @@ import { User } from "../user.entity";
 import { Repository } from "typeorm";
 import { UpdateProfileDTO } from "../dtos/update-profile.dto";
 import { UserException, UserExceptionCode } from "../user.exception";
+import { UserWithoutPassword } from "@athena/types";
 
 @Injectable()
 export class UserProfileService {
@@ -36,4 +37,11 @@ export class UserProfileService {
 
   }
 
+  async getUser(userId: string): Promise<UserWithoutPassword> {
+    const { passwordHash, ...user } = await this.userRepo.findOneByOrFail({ id: userId })
+
+    return user as UserWithoutPassword
+
+
+  }
 }
