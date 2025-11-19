@@ -9,7 +9,9 @@ export class SignupPayload implements SignupRequest {
 
   @ApiProperty()
   @IsString()
-  @Matches(USERNAME_REGEX)
+  @Matches(USERNAME_REGEX, {
+    message: "Can only contains alphanumeric, underscore, and dots. Must start with a letter, cannot have consecutive dots or underscores, and must be 3-20 characters long"
+  })
   username: string;
 
   @ApiProperty()
@@ -33,7 +35,9 @@ export class SignupPayload implements SignupRequest {
 
 
   @ApiProperty()
-  @Matches(PASSWORD_REGEX)
+  @Matches(PASSWORD_REGEX, {
+    message: "Password must contains letters, numbers and at least one symbol"
+  })
   password: string;
 }
 

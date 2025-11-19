@@ -7,10 +7,13 @@ import { UserWalletService } from "./services/user-wallet.service";
 import { TokenLedger } from "../ledger/entities/token-ledger.entity";
 import { UserModule } from "../user/user.module";
 import { Order } from "../market/entities/order.entity";
+import { LedgerModule } from "../ledger/ledger.module";
+import { WalletController } from "./controllers/wallet.controller";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wallet, TokenLedger, Order]), UserModule],
+  imports: [TypeOrmModule.forFeature([Wallet, TokenLedger, Order]), UserModule, LedgerModule],
   providers: [WalletService, UserWalletService],
+  controllers: [WalletController],
   exports: [TypeOrmModule, WalletService, UserWalletService]
 })
 export class WalletModule {

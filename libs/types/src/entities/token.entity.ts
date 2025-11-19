@@ -59,7 +59,7 @@ export interface Wallet {
   id: ID
   ownerType: WalletOwnerType
   ownerId: ID;
-  balance: string; // avoid JS float rounding
+  balance: number;
   updatedAt: string;
 }
 

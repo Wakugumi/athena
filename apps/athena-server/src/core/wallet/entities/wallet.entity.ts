@@ -20,7 +20,7 @@ export class Wallet implements TokenBalance {
 
 
   @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
-  balance: string; // avooid JS float rounding
+  balance: number; // avooid JS float rounding
 
   @OneToMany(() => TokenLedger, (transaction) => transaction.wallet)
   ledgerEntries: Relation<TokenLedger[]>

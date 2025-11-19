@@ -6,13 +6,16 @@ import { AuthException, AuthExceptionCode } from "../auth.exception";
 import { User } from "src/core/user/user.entity";
 import { hashPassword } from "../utils/auth.util";
 import { UserProfileService } from "src/core/user/services/user-profile.service";
+import { WalletService } from "src/core/wallet/services/wallet.service";
+import { WalletOwnerType } from "@athena/types";
 
 @Injectable()
 export class SignupService {
 
   constructor(
     private readonly profileService: UserProfileService,
-    @InjectDataSource() private datasource: DataSource) { }
+    @InjectDataSource() private datasource: DataSource,
+    private readonly wallet: WalletService) { }
 
 
   async signup(payload: SignupPayload) {
@@ -35,6 +38,7 @@ export class SignupService {
 
 
 
+
       const newUser = manager.create(User, {
         username: payload.username,
         email: payload.email,
@@ -45,6 +49,8 @@ export class SignupService {
         displayName: payload.displayName ?? payload.username,
         passwordHash: await hashPassword(payload.password)
       });
+
+      await this.wallet.createWallet(newUser.id, WalletOwnerType.USER)
 
       return await manager.save(User, newUser);
     })
