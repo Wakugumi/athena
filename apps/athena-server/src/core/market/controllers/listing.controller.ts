@@ -26,6 +26,7 @@ export class ListingController {
 
   @Get()
   @Public()
+  @ApiOperation({ description: "query all (search) listings, only returns public view of published listing" })
   @ApiQuery({ name: 'title', type: "string", description: 'search by title of the listing', required: false })
   @ApiQuery({ name: 'seller', type: "string", description: 'search by username or first name and last name of the seller', required: false })
   @ApiQuery({ name: 'min_price', type: 'number', description: 'minimum price range', required: false })

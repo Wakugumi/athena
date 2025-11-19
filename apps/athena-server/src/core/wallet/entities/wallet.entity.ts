@@ -9,7 +9,7 @@ export class Wallet implements TokenBalance {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column({ type: 'enum', enum: WalletOwnerType, enumName: "walle_owner_type" })
+  @Column({ type: 'enum', enum: WalletOwnerType, enumName: "wallet_owner_type" })
   ownerType: WalletOwnerType;
 
   @Column()

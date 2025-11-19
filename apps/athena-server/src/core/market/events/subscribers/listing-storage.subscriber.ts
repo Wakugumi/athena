@@ -48,6 +48,8 @@ export class ListingStorageSubscriber {
 
     await this.listingItemRepo.save(theItem);
 
+    theListing.status = ListingStatus.PROCESSING
+
     theListing.itemsProcessedCount += 1;
 
     if (theListing.itemsExpectedCount == theListing.itemsProcessedCount) {

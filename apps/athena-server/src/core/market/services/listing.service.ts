@@ -9,6 +9,10 @@ import { ImageAsNoteService } from "src/core/note/services/image-as-note.service
 import { StorageService } from "src/engine/storage/services/storage.service";
 import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
 import { resolveFileExtension } from "src/engine/storage/utils/resolve-file-extension.util";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { ListingEvents } from "../enums/listing-events.enum";
+import { ListingUpdatedEvent } from "../events/listing-updated.event";
+import { ListingPublishedEvent } from "../events/listing-published.event";
 
 @Injectable()
 export class ListingService {
@@ -16,7 +20,8 @@ export class ListingService {
   constructor(
     @InjectDataSource() private readonly datasource: DataSource,
     private readonly storageService: StorageService,
-    private readonly storageKeyService: StorageKeyService) { }
+    private readonly storageKeyService: StorageKeyService,
+    private readonly eventEmitter: EventEmitter2) { }
 
   createListItem(blobKey: string, listingId: string) {
     return this.datasource.manager.create(ListingItem, { listingId: listingId, blobKey: blobKey })
@@ -52,6 +57,8 @@ export class ListingService {
     console.log("updating draft", listingId)
     await this.datasource.manager.update(Listing, listingId, payload)
 
+    this.eventEmitter.emit(ListingEvents.UPDATED, new ListingUpdatedEvent(listingId));
+
     return await this.datasource.manager.findOneBy(Listing, { id: listingId }) as Partial<Listing>
   }
 
@@ -66,8 +73,15 @@ export class ListingService {
     if (listing.status != ListingStatus.READY)
       throw new ListingException("Listing is not in ready state for publishing", ListingExceptionCode.LISTING_NOT_READY, 'Listing is still in processing, cannot publish for now', HttpStatus.BAD_REQUEST)
     listing.visibility = Visibility.PUBLIC;
+    listing.status = ListingStatus.PUBLISHED
     listing.publishedAt = new Date().toISOString();
-    return await this.datasource.manager.save(Listing, listing)
+
+
+
+    const saved = await this.datasource.manager.save(Listing, listing)
+
+    this.eventEmitter.emit(ListingEvents.PUBLISHED, new ListingPublishedEvent(listingId));
+    return saved;
   }
 
 
