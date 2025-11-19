@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { SearchListingQuery } from "../queries/search-listing.query";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
 import { CreateDraftListingCommand } from "../commands/create-draft-listing.command";
 import { CurrentUser } from "src/engine/auth/decorators/current-user.decorator";
@@ -13,6 +13,9 @@ import { PublishListingRequest } from "@athena/types";
 import { PublishListingCommand } from "../commands/publish-listing.command";
 import { UploadFileDraftListingDTO } from "../dtos/upload-file-draft-listing.dto";
 import { UploadFileListingCommand } from "../commands/upload-file-listing.command";
+import { Public } from "src/engine/auth/decorators/public-guard.decorator";
+import { FetchListingQuery } from "../queries/fetch-listing.query";
+import { FetchListingResponseDTO } from "../dtos/fetch-listing.output";
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
@@ -22,7 +25,7 @@ export class ListingController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) { }
 
   @Get()
-  @ApiBearerAuth()
+  @Public()
   @ApiQuery({ name: 'title', type: "string", description: 'search by title of the listing', required: false })
   @ApiQuery({ name: 'seller', type: "string", description: 'search by username or first name and last name of the seller', required: false })
   @ApiQuery({ name: 'min_price', type: 'number', description: 'minimum price range', required: false })
@@ -71,6 +74,20 @@ export class ListingController {
       (
         new PublishListingCommand(user.id, payload.id)
       )
+
+  }
+
+
+  @Get(':id')
+  @Public()
+  @ApiBearerAuth()
+  @ApiQuery({ name: "id", description: "Listing Id" })
+  @ApiOperation({ description: "Fetch a detailed PUBLISHED listing only, with Private or Public visibility" })
+  @ApiOkResponse({ type: FetchListingResponseDTO })
+  async get(@Param('id') listingId: string) {
+    return await this.queryBus.execute<FetchListingQuery>(
+      new FetchListingQuery(listingId)
+    )
 
   }
 

@@ -6,7 +6,7 @@ import { UpdateProfileDTO } from "./dtos/update-profile.dto";
 import { ApiBearerAuth, ApiBody } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
 
-@Controller({ scope: Scope.REQUEST })
+@Controller({ scope: Scope.REQUEST, path: 'user' })
 @UseGuards(JwtAuthGuard)
 export class UserController {
 

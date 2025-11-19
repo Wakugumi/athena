@@ -4,10 +4,12 @@ import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/com
 import { AuthGuard } from '@nestjs/passport';
 import { TokenAvoidlistService } from '../services/token-avoidlist.service';
 import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public-guard.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private readonly avoidlistService: TokenAvoidlistService) {
+  constructor(private readonly avoidlistService: TokenAvoidlistService, private reflector: Reflector) {
     super();
   }
 
@@ -22,6 +24,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       if (this.avoidlistService.has(token)) throw new UnauthorizedException("Token has been revoked")
     }
     */
+
+    const isPublic = this.reflector.getAllAndOverride<boolean>(
+      IS_PUBLIC_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isPublic) {
+      return user; // skip auth
+    }
+
+
 
     if (err || !user) {
       const message = info?.message || info?.name || (err?.message ?? "Token validation failed")
