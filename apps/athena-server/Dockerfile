@@ -1,23 +1,22 @@
 
 FROM node:20-alpine AS builder
 
+RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 WORKDIR /app
 
-COPY package*.json ./
-COPY nx.json tsconfig*.json ./
-COPY apps/athena-server ./apps/athena-server
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/athena-server ./apps
 COPY libs ./libs
 
-RUN npm ci
-RUN npx nx build athena-server --configuration=production
+RUN pnpm install --frozen-lockfile
+WORKDIR /app/apps
+RUN pnpm --filter athena-server build
 
 FROM node:20-alpine
 
 WORKDIR /app
-COPY --from=builder /app/dist/apps/athena-server ./dist
-COPY package*.json ./
-
-RUN npm ci --omit=dev
+COPY --from=builder /app/dist/ ./dist
 
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/apps/athena-server/src/main.js"]
