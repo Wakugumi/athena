@@ -8,6 +8,8 @@ import { AthenaConfigService } from '../athena-config/athena-config.service';
 import { StorageKeyService } from './services/storage-key.service';
 import { StorageWebhookController } from './controllers/storage-webhook.controller';
 import { AzureWebhookAdapter } from './webhook-adapters/azure-webhook.adapter';
+import { StorageProcessingService } from './services/storage-processing.service';
+import { NoteModule } from 'src/core/note/note.module';
 
 @Global()
 @Module({})
@@ -15,7 +17,7 @@ export class StorageModule {
   static forRoot(): DynamicModule {
     return {
       module: StorageModule,
-      imports: [AthenaConfigModule],
+      imports: [AthenaConfigModule, NoteModule],
       providers: [
         StorageKeyService,
         StorageDriverFactory,
@@ -40,10 +42,11 @@ export class StorageModule {
           inject: [AthenaConfigService],
         },
         StorageService,
+        StorageProcessingService,
         AzureWebhookAdapter
       ],
       controllers: [StorageTestController, StorageWebhookController],
-      exports: [StorageService, StorageKeyService],
+      exports: [StorageService, StorageKeyService, StorageProcessingService],
     };
   }
 }

@@ -12,16 +12,23 @@ import {
   UseInterceptors,
   UploadedFile,
   HttpException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Readable } from 'stream';
 import { StorageService } from '../services/storage.service';
+import { ApiBody, ApiProperty } from '@nestjs/swagger';
+import { randomUUID } from 'crypto';
 
 class UploadBase64Dto {
+  @ApiProperty()
   filename: string;
+
+  @ApiProperty()
   folder?: string;
   // base64 encoded string
+  @ApiProperty()
   file: string;
 }
 
@@ -68,19 +75,21 @@ export class StorageTestController {
 
   // JSON base64 upload
   @Post('upload/base64')
+  @ApiBody({ type: UploadBase64Dto })
+  @UsePipes(new ValidationPipe())
   async uploadBase64(@Body() body: UploadBase64Dto) {
-    const { filename, folder, file } = body as UploadBase64Dto;
-    if (!filename || !file) throw new HttpException('filename and file are required', HttpStatus.BAD_REQUEST);
+    console.log(body)
 
     try {
-      const buffer = Buffer.from(file, 'base64');
+      let key = 'test/test/' + randomUUID()
+      const { folder, name } = this.storageService.splitKey(key)
       const result = await this.storageService.write({
-        file: buffer,
-        name: filename,
-        folder: folder || '',
+        file: randomUUID(),
+        name: name,
+        folder: folder,
         mimeType: undefined,
       });
-      return { success: true, result };
+      return { key };
     } catch (err) {
       throw new HttpException((err as any)?.message || String(err), HttpStatus.INTERNAL_SERVER_ERROR);
     }

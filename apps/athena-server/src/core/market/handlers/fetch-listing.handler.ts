@@ -18,7 +18,12 @@ export class FetchListingHandler implements IQueryHandler<FetchListingQuery> {
 
   async execute(query: FetchListingQuery): Promise<Listing> {
 
-    const listing = await this.listingRepo.findOneBy({ id: query.listingId })
+    const listing = await this.listingRepo.findOne({
+      where: {
+        id: query.listingId
+      },
+      relations: ['items', "seller", "orders"]
+    })
 
     if (!listing)
       throw new ListingException("No Listing found", ListingExceptionCode.LISTING_NOT_EXIST, "Cannot fetch this product", HttpStatus.NOT_FOUND)

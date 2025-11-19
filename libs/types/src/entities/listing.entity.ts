@@ -17,6 +17,10 @@ export interface ListingItem {
   blobKey: string;
   title: string;
   listingId: ID;
+  /**
+   * markdown of previews
+   */
+  preview?: string | null;
   createdAt: string;
   deletedAt?: string;
 }
