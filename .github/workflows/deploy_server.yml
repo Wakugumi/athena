@@ -30,9 +30,13 @@ jobs:
 
       - name: Build and Push
         run: |
-          IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/athena-server
-          SHA=${{github.sha}}
+          IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/athena-server"
+          SHA="${{github.sha}}"
+
+          echo "IMAGE=$IMAGE"
+          echo "SHA=$SHA"
+
           docker build -t $IMAGE:$SHA -f apps/athena-server/Dockerfile .
           docker push $IMAGE:$SHA
-          docker tag $IMGAE:$SHA $IMAGE:latest
+          docker tag $IMAGE:$SHA $IMAGE:latest
           docker push $IMAGE:latest
