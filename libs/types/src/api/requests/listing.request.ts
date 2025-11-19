@@ -1,8 +1,6 @@
 import { Listing } from "../../entities";
 import { ID } from "../../common/datatype.common";
-import { Currency } from "../../enums/currency.enum";
-import { License } from "../../enums/license.enum";
-import { ContentTypes, Visibility } from "../../enums";
+import { ContentTypes, Visibility, License, Currency } from "../../enums";
 
 export type DraftListingRequest = Partial<Listing>;
 
