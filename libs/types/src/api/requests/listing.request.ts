@@ -1,75 +1,40 @@
+import { Listing } from "../../entities";
 import { ID } from "../../common/datatype.common";
-import { Currency } from "../../enums/currency.enum";
-import { License } from "../../enums/license.enum";
+import { ContentTypes, Visibility, License, Currency } from "../../enums";
 
-export interface CreateListingRequest {
+export type DraftListingRequest = Partial<Listing>;
 
-  /**
-   * Identification data for the note to be listed
-   */
-  noteId: ID
-
-  /**
-   * Identification data for the seller
-  */
-  sellerId: ID
-
-  /**
-   * Title for the listing page
-  */
-  title: string;
-
-  /**
-   * Currency of the price tag
-  */
-  currency: Currency;
-
-  /**
-   * Amount of price for acquiring the listing
-  */
-  price: number;
-
-  /**
-   * License associated with the product
-  */
-  license: License;
-
-}
 
 export interface UpdateListingRequest {
-  noteId?: ID;
-  title?: string;
-  currency?: Currency;
-  price?: number;
-  license?: License
-}
+  id: string;
+  title?: string | null;
+  currency?: Currency | null;
+  price?: number | null;
+  license?: License | null;
+  description?: string | null;
+  visibility?: Visibility | null;
+  summary?: string | null;
+
+};
 
 export interface TakedownListingRequest {
   id: ID;
 }
 
+export interface PublishListingRequest {
+  id: ID;
+}
 
-/**
- * queries for finding listings
-  * can be used for general and advance search
-  */
-export interface FindListingsQuery {
-  title?: string;
-  price?: string;
+export interface UploadFileDraftListingRequest {
+  contentType: ContentTypes,
+  size: number,
   /**
-  * seller's display name
-  */
-  seller?: string
-  currecy?: Currency
-  sellerId?: ID
-  noteId?: ID;
+   * Optional.
+   * Use case: Direct upload file button as new draft or upload to a existing draft
+   */
+  listingId?: string | null
+
 }
 
 
-/**
- *
- * Query for get data of a listing
- */
-export interface FindOneListingQuery {
-  id?: ID;
-}
+
