@@ -3,7 +3,8 @@ import { Listing } from "../entities/listing.entity";
 
 export class FetchDraftListingsQuery extends Query<Listing[]> {
   constructor(
-    public readonly userId: string
+    public readonly userId: string,
+    public readonly listingId?: string,
   ) {
 
     super()

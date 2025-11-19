@@ -63,7 +63,8 @@ export class ListingService {
   }
 
   async publishListing(listingId: string) {
-    const listing = await this.datasource.manager.preload(Listing, { id: listingId })
+    const listing = await this.datasource.manager.findOneBy(Listing, { id: listingId })
+    console.log(listing, listingId)
     if (!listing)
       throw new ListingException("Listing not found", ListingExceptionCode.LISTING_NOT_EXIST, `Listing ${listingId} not exist`, HttpStatus.BAD_REQUEST)
     if (listing?.visibility != Visibility.DRAFT)
@@ -71,7 +72,7 @@ export class ListingService {
 
 
     if (listing.status != ListingStatus.READY)
-      throw new ListingException("Listing is not in ready state for publishing", ListingExceptionCode.LISTING_NOT_READY, 'Listing is still in processing, cannot publish for now', HttpStatus.BAD_REQUEST)
+      throw new ListingException("Listing is not in ready state for publishing", ListingExceptionCode.LISTING_NOT_READY, 'Listing is not ready, cannot publish for now', HttpStatus.BAD_REQUEST)
     listing.visibility = Visibility.PUBLIC;
     listing.status = ListingStatus.PUBLISHED
     listing.publishedAt = new Date().toISOString();

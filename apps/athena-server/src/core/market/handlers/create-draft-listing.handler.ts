@@ -12,6 +12,7 @@ export class CreateDraftListingHandler implements ICommandHandler<CreateDraftLis
   async execute(command: CreateDraftListingCommand): Promise<{ draft: Partial<Listing>; }> {
 
     const draft = await this.listingService.draftListing({
+
       sellerId: command.userId,
       title: "Listing Baru"
     })

@@ -15,7 +15,9 @@ export class PublishListingHandler implements ICommandHandler<PublishListingComm
     await this.listingService.ensureUserOwnsListing(command.userId, command.listingId)
 
 
+    console.log("publish listing", command.listingId)
     const listing = await this.listingService.publishListing(command.listingId);
+
 
 
     return {

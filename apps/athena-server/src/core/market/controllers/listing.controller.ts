@@ -16,6 +16,8 @@ import { UploadFileListingCommand } from "../commands/upload-file-listing.comman
 import { Public } from "src/engine/auth/decorators/public-guard.decorator";
 import { FetchListingQuery } from "../queries/fetch-listing.query";
 import { FetchListingResponseDTO } from "../dtos/fetch-listing.output";
+import { FetchDraftListingsQuery } from "../queries/fetch-draft-listings.query";
+import { PublishListingDto } from "../dtos/publish-listing.dto";
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
@@ -36,6 +38,38 @@ export class ListingController {
       new SearchListingQuery(title, seller, minPrice, maxPrice)
     )
   }
+
+
+  @Get('draft')
+  @ApiBearerAuth()
+  @ApiOperation(
+    {
+      summary: "Fetch all user's draft",
+      description: "Fetch user's drafts"
+    }
+  )
+  async getDrafts(@CurrentUser() user: User): Promise<Listing[]> {
+    return await this.queryBus.execute<FetchDraftListingsQuery>(
+      new FetchDraftListingsQuery(user.id)
+    )
+  }
+
+
+  @Get('draft/:id')
+  @ApiBearerAuth()
+  @ApiOperation(
+    {
+      summary: "Fetch a single draft",
+    }
+  )
+  async getDraft(@CurrentUser() user: User, @Param('id') listingId: string): Promise<Listing> {
+    const listings = await this.queryBus.execute<FetchDraftListingsQuery>(
+      new FetchDraftListingsQuery(user.id, listingId)
+    )
+
+    return listings[0];
+  }
+
 
 
   @Post('draft')
@@ -61,6 +95,8 @@ export class ListingController {
   }
 
   @Post('draft/upload')
+  @ApiBody({ type: UploadFileDraftListingDTO })
+  @ApiBearerAuth()
   async uploadFile(@CurrentUser() user: User, @Body() payload: UploadFileDraftListingDTO): Promise<{ key: string, url: string }> {
     return await this.commandBus.execute<UploadFileListingCommand>(
       new UploadFileListingCommand(user.id, payload.contentType, payload.size, payload.listingId)
@@ -69,8 +105,9 @@ export class ListingController {
   }
 
   @Post('publish')
+  @ApiBody({ type: PublishListingDto })
   @ApiBearerAuth()
-  async publish(@CurrentUser() user: User, @Body() payload: PublishListingRequest): Promise<Partial<Listing>> {
+  async publish(@CurrentUser() user: User, @Body() payload: PublishListingDto): Promise<Partial<Listing>> {
     return await this.commandBus.execute<PublishListingCommand>
       (
         new PublishListingCommand(user.id, payload.id)

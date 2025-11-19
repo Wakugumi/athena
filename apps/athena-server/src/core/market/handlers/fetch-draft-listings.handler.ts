@@ -13,10 +13,15 @@ export class FetchDraftListingsHandler implements IQueryHandler<FetchDraftListin
   ) { }
   async execute(query: FetchDraftListingsQuery): Promise<Listing[]> {
 
+    if (query.listingId)
+      return await this.repo.findBy({
+        id: query.listingId,
+        sellerId: query.userId
+      })
 
     return await this.repo.findBy({
       sellerId: query.userId,
-      visibility: Visibility.DRAFT
+      visibility: Visibility.DRAFT,
     });
 
   }
