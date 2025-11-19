@@ -75,7 +75,7 @@ export class Listing implements IListing {
   orders: Relation<Order[]>
 
 
-  @Column({ type: "enum", enum: ListingStatus, enumName: "listing_status" })
+  @Column({ type: "enum", enum: ListingStatus, enumName: "listing_status", default: ListingStatus.DRAFT })
   status: ListingStatus
 
   @Column({ type: 'int', default: 0 })

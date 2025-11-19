@@ -3,6 +3,7 @@ import { SearchListingQuery } from "../queries/search-listing.query";
 import { Listing } from "../entities/listing.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ListingStatus, Visibility } from "@athena/types";
 
 @QueryHandler(SearchListingQuery)
 export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
@@ -14,8 +15,8 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
 
   async execute(query: SearchListingQuery): Promise<Listing[]> {
     const q = this.listingRepo.createQueryBuilder('x');
-    q.andWhere('x.status = "PUBLISHED"');
-    q.andWhere('x.visibility = "PUBLIC"');
+    q.andWhere('x.status = :status', { status: ListingStatus.PUBLISHED });
+    q.andWhere('x.visibility = :visibility', { visibility: Visibility.PUBLIC });
 
 
     if (query.title)
