@@ -25,3 +25,4 @@ export type FindOneUserResponse = ApiResponse<PublicUser>
 export type FindUsersResponse = ApiResponse<PublicUser[]>
 
 
+export type MeResponse = ApiResponse<UserWithoutPassword>

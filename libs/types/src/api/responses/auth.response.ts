@@ -11,4 +11,3 @@ export type LogoutResponse = ApiResponse<{
   success: boolean
 }>
 
-export type MeResponse = ApiResponse<UserWithoutPassword>
