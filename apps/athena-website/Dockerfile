@@ -23,6 +23,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.8.0 --activate
 
 
+COPY --from=builder /app/apps/athena-website/build ./build
 COPY --from=builder /app/apps/athena-website/public ./public
 COPY --from=builder /app/apps/athena-website/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules

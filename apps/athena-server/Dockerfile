@@ -6,11 +6,11 @@ WORKDIR /app
 
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/athena-server ./apps
+COPY apps ./apps
 COPY libs ./libs
 
 RUN pnpm install --frozen-lockfile
-WORKDIR /app/apps
+WORKDIR /app/apps/athena-server
 RUN pnpm --filter athena-server build
 
 FROM node:20-alpine
@@ -19,4 +19,4 @@ WORKDIR /app
 COPY --from=builder /app/dist/ ./dist
 
 EXPOSE 3000
-CMD ["node", "dist/apps/athena-server/src/main.js"]
+CMD ["pnpm", "--filter athena-server start"]
