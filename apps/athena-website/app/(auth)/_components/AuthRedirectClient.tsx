@@ -9,9 +9,12 @@ export default function AuthRedirectClient() {
   const router = useRouter();
 
   useEffect(() => {
-    if (auth?.checkAuth && auth.checkAuth()) {
-    router.replace("/");
-    }
+    const runCheck = async () => {
+      if (await auth.checkAuth()) {
+        router.replace("/");
+      }
+    };
+    runCheck();
   }, [auth, router]);
 
   return null;

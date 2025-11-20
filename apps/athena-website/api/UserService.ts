@@ -1,4 +1,4 @@
-import { LoginRequest, LoginResponse, SignupRequest, SignupResponse, UpdateProfileRequest, User } from "@athena/types"
+import { LoginRequest, LoginResponse, MeResponse, SignupRequest, SignupResponse, UpdateProfileRequest, UserUpdatedResponse } from "@athena/types"
 import api from "./api"
 
 export default class UserService {
@@ -13,7 +13,7 @@ export default class UserService {
     }
 
     static async me() {
-        return await api.get<User>('/users/me')
+        return await api.get<MeResponse>('/user/me')
             .then((response) => {
                 return response.data
             })
@@ -27,7 +27,7 @@ export default class UserService {
     }
 
     static async updateProfile(request: UpdateProfileRequest) {
-        return await api.put<User>('/users/me/profile', request)
+        return await api.put<UserUpdatedResponse>('/user/profile', request)
             .then((response) => {
                 return response.data
             })

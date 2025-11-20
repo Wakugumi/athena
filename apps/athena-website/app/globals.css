@@ -49,3 +49,12 @@
     --color-secondary:       #72c19d;
     --color-secondary-text:  #0b1914;
 }
+
+html, body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
+}

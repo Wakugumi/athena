@@ -3,15 +3,16 @@
 import { Label, TextInput, Button, Checkbox } from "flowbite-react";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { SignupRequest, UpdateProfileRequest } from "@athena/types";
+import { SignupRequest } from "@athena/types";
 import UserService from "@/api/UserService";
 import { redirect } from "next/navigation";
 import { usePopup } from "@/context/PopupContext";
 import { useAuth } from "@/context/AuthContext";
+import ProfileFormClient from "@/app/_components/ProfileFormClient";
 
 export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
-    const { openPopup, closePopup } = usePopup();
+    const { openPopup } = usePopup();
     const auth = useAuth();
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -21,6 +22,7 @@ export default function RegisterPage() {
             firstName: form.get("firstname") as string,
             lastName: form.get("lastname") as string,
             username: form.get("username") as string,
+            displayName: form.get("username") as string,
             email: form.get("email") as string,
             password: form.get("password") as string,
         };
@@ -35,43 +37,7 @@ export default function RegisterPage() {
                 password: data.password
             });
             openPopup(
-                <>
-                    <div className="space-y-6">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-foreground">Update Profile</h1>
-                        </div>
-                        <form className="flex flex-col gap-4" onSubmit={(e: FormEvent<HTMLFormElement>) => {
-                            e.preventDefault();
-                            const form = new FormData(e.currentTarget);
-                            const data: UpdateProfileRequest = {
-                                displayName: form.get("displayName") as string,
-                                bio: form.get("bio") as string,
-                            }
-                            UserService.updateProfile(data).then(() => {
-                                closePopup();
-                            });
-                        }}>
-                            <div>
-                                <div className="mb-2 block">
-                                    <Label htmlFor="displayName">Display name</Label>
-                                </div>
-                                <TextInput id="displayName" name="displayName" type="text" required />
-                            </div>
-                            <div>
-                                <div className="mb-2 block">
-                                    <Label htmlFor="bio">Bio</Label>
-                                </div>
-                                <TextInput id="bio" name="bio" type="text" required />
-                            </div>
-                            {error && (
-                                <p className="text-sm text-red-600">{error}</p>
-                            )}
-                            <Button type="submit" color="primary" className="w-full">
-                                Update Profile
-                            </Button>
-                        </form>
-                    </div>
-                </>,
+                <ProfileFormClient />,
                 "surface"
             );
             redirect('/');

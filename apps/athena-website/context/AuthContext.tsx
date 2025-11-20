@@ -1,29 +1,29 @@
 "use client";
 
 import UserService from "@/api/UserService";
-import { LoginRequest, User } from "@athena/types";
+import { LoginRequest, UserWithoutPassword } from "@athena/types";
 import { redirect } from "next/navigation";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 interface AuthContextProps {
-    user: User | null;
-    login: (request: LoginRequest) => void;
-    logout: () => void;
-    checkAuth: () => boolean;
+    user: UserWithoutPassword | undefined | null;
+    login: (request: LoginRequest) => Promise<void>;
+    logout: () => Promise<void>;
+    checkAuth: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserWithoutPassword | undefined | null>(null);
 
-    const login = (request: LoginRequest) => {
-        UserService.login(request).then((response) => {
+    const login = async (request: LoginRequest) => {
+        await UserService.login(request).then(async (response) => {
             const token = response.data?.access_token;
             if (token) {
                 localStorage.setItem("access_token", token);
-                UserService.me().then((res) => {
-                    setUser(res);
+                await UserService.me().then((res) => {
+                    setUser(res.data);
                 }).catch(() => {
                     setUser(null);
                 });
@@ -34,19 +34,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
     };
 
-    const logout = () => {
-        UserService.logout().then(() => {
-            localStorage.removeItem("access_token");
+    const logout = async () => {
+        await UserService.logout().then(() => {
             setUser(null);
+            localStorage.removeItem("access_token");
             redirect('/login');
         }).catch((err) => {
             throw err;
         });
     };
 
-    const checkAuth = () => {
-        UserService.me().then((res) => {
-            setUser(res);
+    const checkAuth = async () => {
+        await UserService.me().then((res) => {
+            setUser(res.data);
         }).catch(() => {
             setUser(null);
         });
