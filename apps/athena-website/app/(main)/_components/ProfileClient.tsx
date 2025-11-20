@@ -1,6 +1,8 @@
 "use client";
 
+import ProfileFormClient from "@/app/_components/ProfileFormClient";
 import { useAuth } from "@/context/AuthContext";
+import { usePopup } from "@/context/PopupContext";
 import { Avatar, Button, Dropdown } from "flowbite-react";
 
 interface ProfileClientProps {
@@ -11,6 +13,14 @@ export default function ProfileClient({
     onLogout,
 }: ProfileClientProps) {
     const auth = useAuth();
+    const { openPopup } = usePopup();
+
+    const showProfileForm = () => {
+        openPopup(
+            <ProfileFormClient />,
+            "surface"
+        );
+    }
 
     return (
         <div className="inline-block">
@@ -30,6 +40,9 @@ export default function ProfileClient({
                 }
                 placement="bottom-end"
             >
+                <div className="bg-surface px-2 py-1">
+                    <Button color="primary" onClick={showProfileForm}>Edit Profile</Button>
+                </div>
                 <div className="bg-surface px-2 py-1">
                     <Button color="primary" onClick={onLogout}>Logout</Button>
                 </div>

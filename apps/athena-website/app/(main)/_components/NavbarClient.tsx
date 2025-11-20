@@ -5,10 +5,21 @@ import Logo from "@/app/_components/Logo";
 import { Navbar, NavbarToggle, NavbarCollapse, NavbarLink, NavbarBrand, Button } from "flowbite-react";
 import { useAuth } from "@/context/AuthContext";
 import ProfileClient from "./ProfileClient";
+import { useEffect, useState } from "react";
 
 export default function NavbarClient() {
     const auth = useAuth();
-    if (auth.checkAuth()) {
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            const authenticated = await auth.checkAuth();
+            setIsAuthenticated(authenticated);
+        }
+        checkAuthentication();
+    }, [auth]);
+
+    if (isAuthenticated) {
         return (
             <>
                 <Navbar fluid className="fixed inset-x-0 top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
@@ -23,7 +34,6 @@ export default function NavbarClient() {
                     <NavbarCollapse>
                         <NavbarLink href="/">Home</NavbarLink>
                         <NavbarLink href="/market">Market</NavbarLink>
-                        <NavbarLink href="/pricing">Pricing</NavbarLink>
                     </NavbarCollapse>
                 </Navbar>
             </>
@@ -49,7 +59,6 @@ export default function NavbarClient() {
                     <NavbarCollapse>
                         <NavbarLink href="/">Home</NavbarLink>
                         <NavbarLink href="/market">Market</NavbarLink>
-                        <NavbarLink href="/pricing">Pricing</NavbarLink>
                     </NavbarCollapse>
                 </Navbar>
             </>
