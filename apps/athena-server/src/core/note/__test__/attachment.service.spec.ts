@@ -3,6 +3,10 @@ import { AttachmentService } from "../services/attachment.service"
 import { StorageService } from "apps/athena-server/src/engine/storage/services/storage.service"
 import { } from '@athena/types'
 import { ContentTypes } from "apps/athena-server/src/engine/storage/types/storage.types"
+import { getRepositoryToken } from "@nestjs/typeorm"
+import { NoteAttachment } from "../entities/note-attachment.entity"
+import { StorageKeyService } from "src/engine/storage/services/storage-key.service"
+import { randomUUID } from "crypto"
 
 describe("AttachmentsService", () => {
   let attachment: AttachmentService
@@ -10,6 +14,12 @@ describe("AttachmentsService", () => {
     getUrl: jest.fn(),
     getPublicUrl: jest.fn()
   }
+  let storageKey = {
+    create: jest.fn(),
+  }
+
+  let storageKeyMock = randomUUID();
+
   beforeEach(async () => {
 
 
@@ -19,12 +29,30 @@ describe("AttachmentsService", () => {
         {
           provide: StorageService,
           useValue: storage
-        }],
+        },
+        {
+          provide: StorageKeyService,
+          useValue: storageKey
+        },
+
+        {
+          provide: getRepositoryToken(NoteAttachment),
+          useValue: {
+            create: jest.fn(),
+            save: jest.fn()
+
+          }
+        }
+      ],
 
 
     }).compile()
     attachment = module.get(AttachmentService);
     storage = module.get(StorageService);
+    storageKey = module.get(StorageKeyService);
+
+    jest.clearAllMocks();
+    storageKey.create.mockResolvedValue(storageKeyMock)
   })
 
   describe("defined", () => {
@@ -54,9 +82,9 @@ describe("AttachmentsService", () => {
     it('get public url', async () => {
       const mockKey = "key";
       const mockUrl = "url"
-      storage.getPublicUrl.mockReturnValueOnce(mockUrl);
-      const url = await attachment.getPublicUrl(mockKey);
-      expect(storage.getPublicUrl).toHaveBeenCalledWith({ key: mockKey })
+      storage.getUrl.mockReturnValueOnce(mockUrl);
+      const url = attachment.getPublicUrl(mockKey);
+      expect(storage.getUrl).toHaveBeenCalledWith({ key: mockKey })
       expect(url).toEqual(mockUrl)
 
     })

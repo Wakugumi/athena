@@ -29,7 +29,7 @@ export interface Listing {
   id: ID;
   /** Items in this listing */
   items: ListingItem[]
-  sellerId: ID;
+  ownerId: ID;
   title: string;
   description?: string | null;
   /**

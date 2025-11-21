@@ -1,11 +1,9 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, DeepPartial } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DeepPartial, Repository } from "typeorm";
 import { Listing } from "../entities/listing.entity";
-import { ListingItem } from "../entities/listing-item.entity";
-import { ContentTypes, Currency, License, ListingStatus, Visibility } from "@athena/types";
-import { ListingException, ListingExceptionCode } from "../exceptions/listing.exception";
-import { ImageAsNoteService } from "src/core/note/services/image-as-note.service";
+import { ContentTypes, ListingStatus, Visibility } from "@athena/types";
+import { ListingException, ListingExceptionCode } from "../listing.exception";
 import { StorageService } from "src/engine/storage/services/storage.service";
 import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
 import { resolveFileExtension } from "src/engine/storage/utils/resolve-file-extension.util";
@@ -18,32 +16,33 @@ import { ListingPublishedEvent } from "../events/listing-published.event";
 export class ListingService {
 
   constructor(
-    @InjectDataSource() private readonly datasource: DataSource,
+    @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
     private readonly storageService: StorageService,
     private readonly storageKeyService: StorageKeyService,
     private readonly eventEmitter: EventEmitter2) { }
 
-  createListItem(blobKey: string, listingId: string) {
-    return this.datasource.manager.create(ListingItem, { listingId: listingId, blobKey: blobKey })
-
-  }
-
 
   async ensureUserOwnsListing(userId: string, listingId: string) {
-    const found = await this.datasource.manager.findOneBy(Listing, { id: listingId })
-    if (found?.sellerId != userId)
+    const found = await this.listingRepo.findOneBy({ id: listingId })
+    if (found?.ownerId != userId)
       throw new ListingException("Listing and User not match", ListingExceptionCode.LISTING_UNAUTHORIZED, "User do not own this Listing", HttpStatus.UNAUTHORIZED)
+
+
+    return;
   }
 
   async ensureDraft(listingId: string) {
-    const found = await this.datasource.manager.findOneBy(Listing, { id: listingId })
+    const found = await this.listingRepo.findOneBy({ id: listingId })
     if (found?.status != ListingStatus.DRAFT || found.visibility !== Visibility.DRAFT)
       throw new ListingException("Cannot edit publised draft", ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Cannot update Listing that is not in draft state", HttpStatus.BAD_REQUEST)
+
+
+    return;
   }
 
 
   async draftListing(payload: DeepPartial<Listing>): Promise<Listing> {
-    return this.datasource.manager.save(Listing, {
+    return this.listingRepo.save({
       ...payload,
       visibility: Visibility.DRAFT,
       status: ListingStatus.DRAFT,
@@ -54,16 +53,18 @@ export class ListingService {
     payload = Object.fromEntries(
       Object.entries(payload).filter(([_, v]) => v !== undefined && v !== null)
     );
-    console.log("updating draft", listingId)
-    await this.datasource.manager.update(Listing, listingId, payload)
+
+    await this.ensureDraft(listingId)
+
+    await this.listingRepo.update(listingId, payload)
 
     this.eventEmitter.emit(ListingEvents.UPDATED, new ListingUpdatedEvent(listingId));
 
-    return await this.datasource.manager.findOneBy(Listing, { id: listingId }) as Partial<Listing>
+    return await this.listingRepo.findOneBy({ id: listingId }) as Partial<Listing>
   }
 
   async publishListing(listingId: string) {
-    const listing = await this.datasource.manager.findOneBy(Listing, { id: listingId })
+    const listing = await this.listingRepo.findOneBy({ id: listingId })
     console.log(listing, listingId)
     if (!listing)
       throw new ListingException("Listing not found", ListingExceptionCode.LISTING_NOT_EXIST, `Listing ${listingId} not exist`, HttpStatus.BAD_REQUEST)
@@ -77,9 +78,7 @@ export class ListingService {
     listing.status = ListingStatus.PUBLISHED
     listing.publishedAt = new Date().toISOString();
 
-
-
-    const saved = await this.datasource.manager.save(Listing, listing)
+    const saved = await this.listingRepo.save(listing)
 
     this.eventEmitter.emit(ListingEvents.PUBLISHED, new ListingPublishedEvent(listingId));
     return saved;

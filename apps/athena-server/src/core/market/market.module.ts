@@ -1,10 +1,8 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Escrow } from "./entities/escrow.entity";
-import { Listing } from "./entities/listing.entity";
 import { Order } from "./entities/order.entity";
 import { EscrowService } from "./services/escrow.service";
-import { ListingService } from "./services/listing.service";
 import { OrderService } from "./services/order.service";
 import { OrderOwnersipService } from "./services/order-ownership.service";
 import { CreateDraftListingHandler } from "./handlers/create-draft-listing.handler";
@@ -19,14 +17,12 @@ import { ListingController } from "./controllers/listing.controller";
 import { StorageModule } from "src/engine/storage/storage.module";
 import { WalletModule } from "../wallet/wallet.module";
 import { LedgerModule } from "../ledger/ledger.module";
-import { ListingItem } from "./entities/listing-item.entity";
-import { ListingStorageSubscriber } from "./events/subscribers/listing-storage.subscriber";
 import { FetchDraftListingsHandler } from "./handlers/fetch-draft-listings.handler";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Escrow, Listing, Order, ListingItem]), StorageModule, WalletModule, LedgerModule],
+  imports: [TypeOrmModule.forFeature([Escrow, Order]), StorageModule, WalletModule, LedgerModule],
   controllers: [OrderController, ListingController],
-  providers: [EscrowService, ListingService, OrderService, OrderOwnersipService,
+  providers: [EscrowService, OrderService, OrderOwnersipService,
     CreateDraftListingHandler, CreateOrderHandler, ProcessOrderHandler, PublishListingHandler, SearchListingHandler, UpdateDraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber, FetchDraftListingsHandler
   ],
   exports: [TypeOrmModule]

@@ -2,7 +2,7 @@ import { OrderStatus, Order as OrderType } from '@athena/types';
 import { User } from 'src/core/user/user.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from 'typeorm';
 import { Escrow } from './escrow.entity';
-import { Listing } from './listing.entity';
+import { Listing } from 'src/core/listing/entities/listing.entity';
 
 @Entity('order')
 @Index('UQ_ORDER_ESCROW_ID', ['escrowId'], { unique: true })

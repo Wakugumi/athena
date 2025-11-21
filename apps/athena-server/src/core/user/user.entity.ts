@@ -1,18 +1,17 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index, OneToOne, Relation, OneToMany } from "typeorm";
 import { User as SharedUser } from "@athena/types"
-import { UUID } from "crypto";
 import { IsEmail, Matches } from "class-validator";
 import { USERNAME_REGEX } from "src/engine/auth/utils/auth.util";
 import { Wallet } from "../wallet/entities/wallet.entity";
 import { Order } from "../market/entities/order.entity";
-import { Listing } from "../market/entities/listing.entity";
+import { Listing } from "../listing/entities/listing.entity";
 
 @Entity('user')
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
 @Index('UQ_USER_EMAIL', ['email'], { unique: true })
 export class User implements SharedUser {
   @PrimaryGeneratedColumn()
-  id: string | UUID;
+  id: string;
 
   @Column({ type: 'varchar' })
   displayName: string;
@@ -59,7 +58,7 @@ export class User implements SharedUser {
   @OneToMany(() => Order, (transaction) => transaction.seller)
   sellTransactions: Relation<Order[]>;
 
-  @OneToMany(() => Listing, (listing) => listing.seller)
+  @OneToMany(() => Listing, (listing) => listing.owner)
   listings: Relation<Listing[]>
 
 }
