@@ -10,6 +10,10 @@
     "type": "git",
     "url": "git+https://github.com/Wakugumi/athena.git"
   },
+  "scripts": {
+    "test:server": "pnpm --filter athena-server test",
+    "test": "pnpm run test:server"
+  },
   "license": "ISC",
   "author": "",
   "type": "commonjs",

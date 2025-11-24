@@ -187,31 +187,22 @@ describe('Listing Service', () => {
       }
     });
 
-    /**
-      * TODO: Analyze this test
-      * hypothesis:
-      * the save method on repo must be mocked, but that would just make the actual logic useless
-      */
     it('should publish', async () => {
       let mockDraft = {
         ...mockListing,
         visibility: Visibility.DRAFT,
         status: ListingStatus.READY
       }
-      let mockResult = {
-        ...mockListing,
-        visibility: Visibility.PUBLIC,
-        status: ListingStatus.PUBLISHED,
-        publishedAt: new Date().toISOString()
-      }
-
 
       listingRepo.findOneBy.mockResolvedValueOnce(mockDraft);
-      listingRepo.save.mockResolvedValueOnce(mockResult)
+      jest.spyOn(listingRepo, 'save').mockImplementation(async (l) => l);
       const result = await service.publishListing(mockDraft.id);
       expect(listingRepo.findOneBy).toHaveBeenCalled()
       expect(listingRepo.save).toHaveBeenCalled()
-      expect(result).toEqual(mockResult)
+      expect(result.visibility).toBe(Visibility.PUBLIC)
+      expect(result.status).toBe(ListingStatus.PUBLISHED)
+      expect(result.publishedAt).toBeDefined()
+
 
     });
 
