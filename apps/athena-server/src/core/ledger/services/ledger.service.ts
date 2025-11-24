@@ -13,7 +13,7 @@ export class LedgerService {
     return this.repo.save(data)
   }
 
-  async assertBalace(walletId: string, amount: number) {
+  async assertBalance(walletId: string, amount: number) {
     const balance = await this.getBalance(walletId);
     if (balance < amount)
       throw new LedgerException("Insufficient Balance", LedgerExceptionCode.INSUFFICIENT_BALANCE)
@@ -32,15 +32,15 @@ export class LedgerService {
   }
 
 
-  async transfer(fromWalletId: string, toWalletId: string, amount: number, refType: TokenLedgerReferenceType, refId: string, type: TokenLedgerType) {
+  async transfer(fromWalletId: string, toWalletId: string, amount: number, refType: TokenLedgerReferenceType, refId: string) {
     if (amount <= 0) throw new LedgerException("Amount of transfer must be positive", LedgerExceptionCode.TRANSFER_AMOUNT_NEGATIVE);
 
-    await this.assertBalace(fromWalletId, amount);
+    await this.assertBalance(fromWalletId, amount);
 
     await this.createEntry({
       amount: -amount,
       walletId: fromWalletId,
-      type: type,
+      type: TokenLedgerType.DEBIT,
       referenceType: refType,
       referenceId: refId
       ,
@@ -50,7 +50,7 @@ export class LedgerService {
     await this.createEntry({
       amount: amount,
       walletId: toWalletId,
-      type: type,
+      type: TokenLedgerType.CREDIT,
       referenceId: refId,
       referenceType: refType
     })
