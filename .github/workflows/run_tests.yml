@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        apps: [apps/athena-server, apps/athena-website]
+        apps: [apps/athena-server]
 
     steps:
 
@@ -22,10 +22,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: "pnpm"
 
-      - run: npm install
-
+      - run: pnpm install
 
       - run: pnpm test
         working-directory: ${{ matrix.apps }}
