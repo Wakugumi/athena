@@ -2,7 +2,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlobServiceClient, ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'; // Azure SDK
 import { AthenaConfigService } from 'src/engine/athena-config/athena-config.service';
-import { StorageUploadEvent } from '../types/storage-upload-event.type';
 import { MarkdownService } from 'src/core/note/services/markdown.service';
 
 @Injectable()
@@ -44,8 +43,12 @@ export class StorageProcessingService {
     return Buffer.concat(chunks);
   }
 
-  async convertImageToMarkdown(event: StorageUploadEvent): Promise<string> {
-    const blobClient = this.container.getBlobClient(event.key);
+  /**
+  * TODO: May be CPU heavy depending on image size
+  * may reconsider file size limitation or micro service
+  */
+  async convertImageToMarkdown(blobKey: string): Promise<string> {
+    const blobClient = this.container.getBlobClient(blobKey);
 
     // Download image content
     const downloadResponse = await blobClient.download();
@@ -61,7 +64,7 @@ export class StorageProcessingService {
       // Node.js stream: read into buffer
       buffer = await this.streamToBuffer(downloadResponse.readableStreamBody);
     } else {
-      throw new Error(`Blob ${event.key} has no readableStreamBody`);
+      throw new Error(`Blob ${blobKey} has no readableStreamBody`);
     }
 
 
@@ -69,16 +72,16 @@ export class StorageProcessingService {
     const base64 = buffer.toString('base64');
 
     // Generate Markdown content
-    const markdownContent = `![${event.key}](data:image/${this.getExtension(event.key)};base64,${base64})`;
+    const markdownContent = `![${blobKey}](data:image/${this.getExtension(blobKey)};base64,${base64})`;
 
     // Create new Markdown blob key
-    const mdBlobKey = event.key.replace(/\.(png|jpg|jpeg|gif)$/, '.md');
+    const mdBlobKey = blobKey.replace(/\.(png|jpg|jpeg|gif)$/, '.md');
     const mdBlobClient = this.container.getBlockBlobClient(mdBlobKey);
 
     // Upload Markdown blob
     await mdBlobClient.upload(markdownContent, Buffer.byteLength(markdownContent));
 
-    this.logger.log(`Converted image ${event.key} → markdown blob ${mdBlobKey}`);
+    this.logger.log(`Converted image ${blobKey} → markdown blob ${mdBlobKey}`);
     return mdBlobKey;
   }
 

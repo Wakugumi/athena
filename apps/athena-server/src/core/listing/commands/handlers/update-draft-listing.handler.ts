@@ -1,7 +1,7 @@
-import { Command, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { UpdateDraftListingCommand } from "../commands/update-draft-listing.command";
-import { ListingService } from "../services/listing.service";
-import { Listing } from "../entities/listing.entity";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { UpdateDraftListingCommand } from "../update-draft-listing.command";
+import { ListingService } from "../../services/listing.service";
+import { Listing } from "../../entities/listing.entity";
 
 @CommandHandler(UpdateDraftListingCommand)
 export class UpdateDraftListingHandler implements ICommandHandler<UpdateDraftListingCommand> {

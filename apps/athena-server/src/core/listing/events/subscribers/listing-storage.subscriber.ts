@@ -2,18 +2,18 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { Listing } from "../../entities/listing.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FileUploadedEvent } from "src/engine/storage/events/file-uploaded.event";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { StorageEvents } from "src/engine/storage/enums/storage-events.enum";
-import { StorageDomain, StorageKeyService } from "src/engine/storage/services/storage-key.service";
-import { ListingException, ListingExceptionCode } from "../../exceptions/listing.exception";
+import { StorageKeyService } from "src/engine/storage/services/storage-key.service";
 import { ListingItem } from "../../entities/listing-item.entity";
 import { ListingEvents } from "../../enums/listing-events.enum";
 import { ListingItemReadyEvent } from "../listing-item-ready.event";
-import { ListingStatus } from "@athena/types";
-import { StorageUploadEvent } from "src/engine/storage/types/storage-upload-event.type";
 import { StorageProcessingService } from "src/engine/storage/services/storage-processing.service";
 import { StorageService } from "src/engine/storage/services/storage.service";
+import { FileUploadedEvent } from "src/engine/storage/events/file-uploaded.event";
+import { UploadService } from "src/engine/storage/services/upload.service";
+import { UploadDomain } from "src/engine/storage/enums/upload-domain.enum";
+import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
 
 
 @Injectable()
@@ -26,68 +26,64 @@ export class ListingStorageSubscriber {
     private readonly key: StorageKeyService,
     private readonly eventEmitter: EventEmitter2,
     private readonly storageProcessing: StorageProcessingService,
-    private readonly storage: StorageService
+    private readonly storage: StorageService,
+    private readonly uploadService: UploadService
   ) { }
 
 
   @OnEvent(StorageEvents.FILE_UPLOADED)
-  async handleListingItem(event: StorageUploadEvent) {
+  async handleListingItem(event: FileUploadedEvent) {
 
-    this.logger.log(`Handling Listing Upload Event ${event.key}`)
+    if (event.domain !== UploadDomain.LISTING || event.purpose !== UploadPurpose.UPLOADS) return;
 
-    let { key } = event;
+    this.logger.log(`Handling Listing Upload Event ${event.uploadId}`)
 
-    const keyComponents = this.key.splitKey(key);
 
-    if (!key.includes(`/${StorageDomain.LISTING}/`)) return;
+    const upload = await this.uploadService.lookupJob(event.uploadId);
+
+    const theListing = await this.listingRepo.findOneByOrFail({ id: upload.referenceId })
+
+    theListing.itemsExpectedCount += 1
+
+
+    let { key } = upload;
+
+    // const keyComponents = this.key.splitKey(key);
 
     let preview = '**Preview**'
 
 
+    // if the blob's key extension represent media file
     if (key.match(/\.(png|jpg|jpeg|gif)$/)) {
 
-      key = await this.storageProcessing.convertImageToMarkdown(event)
+      key = await this.storageProcessing.convertImageToMarkdown(key)
 
-      preview = `![${key}](${this.storage.getUrl({ signed: false, key: key })})`;
+      preview = `![${key}](${this.storage.getUrl({ key: key })})`;
     }
 
     preview = await this.storageProcessing.generatePreview(key)
 
 
-    this.logger.log("Handling Listing Upload Event 2")
-    const theListing = await this.listingRepo.preload({ id: keyComponents.ownerId });
+    this.logger.log(`saving listing item record ${upload.id} ${upload.key}`)
 
-    if (!theListing)
-      throw new ListingException("No listing found to handle item", ListingExceptionCode.LISTING_NOT_EXIST);
-
-
-
-
-
-    const theItem = this.listingItemRepo.create({
-      listingId: theListing.id,
-      blobKey: key,
-      title: keyComponents.filename,
-      preview: preview
-
-
+    const newItem = await this.listingItemRepo.save({
+      id: upload.id,
+      listingId: upload.referenceId,
+      title: upload.key
     })
 
-    await this.listingItemRepo.save(theItem);
+    this.logger.log("Saved new Listing Item record", newItem.id)
 
-    theListing.status = ListingStatus.PROCESSING
+    await this.listingItemRepo.update({ id: newItem.id }, { status: "READY", preview: preview, blobKey: key })
 
-    theListing.itemsProcessedCount += 1;
+    theListing.preview = preview;
+    theListing.summary = preview;
 
-    if (theListing.itemsExpectedCount == theListing.itemsProcessedCount) {
-      theListing.status = ListingStatus.READY
-    }
-
-    await this.listingRepo.save(theListing);
+    await this.listingRepo.save(theListing)
 
     this.eventEmitter.emit(
       ListingEvents.ITEM_READY,
-      new ListingItemReadyEvent(theListing.id, theItem.id)
+      new ListingItemReadyEvent(newItem.listingId, newItem.id)
     )
 
   }

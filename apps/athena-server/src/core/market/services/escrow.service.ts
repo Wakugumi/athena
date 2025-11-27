@@ -27,7 +27,7 @@ export class EscrowService {
 
     const escrowWallet = await this.createEscrowWallet(orderId);
     return this.datasource.transaction(async trx => {
-      await this.ledgerService.transfer(buyerId, escrowWallet.id, amount, TokenLedgerReferenceType.ORDER, orderId, TokenLedgerType.DEBIT)
+      await this.ledgerService.transfer(buyerId, escrowWallet.id, amount, TokenLedgerReferenceType.ORDER, orderId)
 
       const escrowRepo = trx.getRepository(Escrow)
       return escrowRepo.save({
@@ -46,7 +46,7 @@ export class EscrowService {
 
     return this.datasource.transaction(async trx => {
       const order = await trx.findOneByOrFail(Order, { id: orderId })
-      await this.ledgerService.transfer(escrowWallet.id, sellerId, order.amount, TokenLedgerReferenceType.ORDER, orderId, TokenLedgerType.CREDIT);
+      await this.ledgerService.transfer(escrowWallet.id, sellerId, order.amount, TokenLedgerReferenceType.ORDER, orderId);
       await trx.getRepository(Escrow).update({ orderId: orderId }, { status: EscrowStatus.RELEASED })
     })
   }
@@ -59,7 +59,7 @@ export class EscrowService {
 
     return this.datasource.transaction(async trx => {
       const order = await trx.findOneByOrFail(Order, { id: orderId })
-      await this.ledgerService.transfer(escrowWallet.id, buyerId, order.amount, TokenLedgerReferenceType.REFUND, orderId, TokenLedgerType.CREDIT);
+      await this.ledgerService.transfer(escrowWallet.id, buyerId, order.amount, TokenLedgerReferenceType.REFUND, orderId);
       await trx.getRepository(Escrow).update({ orderId: orderId }, { status: EscrowStatus.REFUNDED })
     })
   }

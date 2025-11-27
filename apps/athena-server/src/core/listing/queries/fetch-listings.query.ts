@@ -6,10 +6,10 @@ import { ListingStatus, Visibility } from "@athena/types";
  * Query current user's listing
   * Not for public usage (auth required)
   */
-export class FetchMyListingsQuery extends Query<Listing[]> {
+export class FetchListingsQuery extends Query<Listing[]> {
 
   constructor(
-    public readonly userId: string,
+    public readonly userId?: string,
     public readonly listingId?: string,
     public readonly title?: string,
     public readonly visibility?: Visibility,

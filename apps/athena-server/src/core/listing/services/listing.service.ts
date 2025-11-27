@@ -2,23 +2,24 @@ import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 import { Listing } from "../entities/listing.entity";
-import { ContentTypes, ListingStatus, Visibility } from "@athena/types";
+import { ContentTypes, ListingStatus, UploadInstruction, Visibility } from "@athena/types";
 import { ListingException, ListingExceptionCode } from "../listing.exception";
-import { StorageService } from "src/engine/storage/services/storage.service";
-import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
-import { resolveFileExtension } from "src/engine/storage/utils/resolve-file-extension.util";
-import { EventEmitter2 } from "@nestjs/event-emitter";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { ListingEvents } from "../enums/listing-events.enum";
 import { ListingUpdatedEvent } from "../events/listing-updated.event";
 import { ListingPublishedEvent } from "../events/listing-published.event";
+import { UploadService } from "src/engine/storage/services/upload.service";
+import { UploadDomain } from "src/engine/storage/enums/upload-domain.enum";
+import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
+import { ListingItem } from "../entities/listing-item.entity";
 
 @Injectable()
 export class ListingService {
 
   constructor(
     @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
-    private readonly storageService: StorageService,
-    private readonly storageKeyService: StorageKeyService,
+    @InjectRepository(ListingItem) private readonly listingItemRepo: Repository<ListingItem>,
+    private readonly uploadService: UploadService,
     private readonly eventEmitter: EventEmitter2) { }
 
 
@@ -32,8 +33,8 @@ export class ListingService {
   }
 
   async ensureDraft(listingId: string) {
-    const found = await this.listingRepo.findOneBy({ id: listingId })
-    if (found?.status != ListingStatus.DRAFT || found.visibility !== Visibility.DRAFT)
+    const found = await this.listingRepo.findOneByOrFail({ id: listingId })
+    if (found.visibility !== Visibility.DRAFT)
       throw new ListingException("Cannot edit publised draft", ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Cannot update Listing that is not in draft state", HttpStatus.BAD_REQUEST)
 
 
@@ -65,15 +66,15 @@ export class ListingService {
 
   async publishListing(listingId: string) {
     const listing = await this.listingRepo.findOneBy({ id: listingId })
-    console.log(listing, listingId)
     if (!listing)
       throw new ListingException("Listing not found", ListingExceptionCode.LISTING_NOT_EXIST, `Listing ${listingId} not exist`, HttpStatus.BAD_REQUEST)
-    if (listing?.visibility != Visibility.DRAFT)
+    if (listing?.visibility !== Visibility.DRAFT)
       throw new ListingException(`Cannot publish listing, may be already published`, ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Listing already published", HttpStatus.BAD_REQUEST);
 
 
-    if (listing.status != ListingStatus.READY)
+    if (listing.status !== ListingStatus.READY)
       throw new ListingException("Listing is not in ready state for publishing", ListingExceptionCode.LISTING_NOT_READY, 'Listing is not ready, cannot publish for now', HttpStatus.BAD_REQUEST)
+
     listing.visibility = Visibility.PUBLIC;
     listing.status = ListingStatus.PUBLISHED
     listing.publishedAt = new Date().toISOString();
@@ -88,27 +89,43 @@ export class ListingService {
   async uploadFileForListing(params: {
     listingId: string,
     mimeType: ContentTypes,
-    size: number,
-    originalFilename?: string
-  }): Promise<{
-    key: string,
-    url: string
-  }> {
+  }): Promise<UploadInstruction> {
+    const theListing = await this.listingRepo.findOneByOrFail({ id: params.listingId })
 
-    const key = this.storageKeyService.create({
-      ownerId: params.listingId,
-      domain: StorageDomain.LISTING,
-      extension: resolveFileExtension(params.mimeType),
-      purpose: StoragePurpose.UPLOADS
-    })
 
-    const url = await this.storageService.getUrl({
-      key: key,
+    const upload = await this.uploadService.createUpload({
+      referenceId: theListing.id,
       contentType: params.mimeType,
-      signed: true
+      domain: UploadDomain.LISTING,
+      purpose: UploadPurpose.UPLOADS
     })
 
-    return { key, url }
+    return upload
+
+
+  }
+
+  async markItemReady(listingId: string) {
+
+    const theListing = await this.listingRepo.findOneBy({ id: listingId })
+    if (!theListing)
+      throw new ListingException("Abort event handlers, no Listing found", ListingExceptionCode.LISTING_NOT_EXIST);
+
+
+
+    const sum = await this.listingItemRepo.createQueryBuilder('c')
+      .where('c.listingId = :id', { id: listingId })
+      .andWhere('c.status = :status', { status: 'READY' })
+      .getCount();
+
+    theListing.itemsProcessedCount = Number(sum)
+
+
+    if (theListing.itemsProcessedCount == theListing.itemsExpectedCount) {
+      theListing.status = ListingStatus.READY
+    }
+    await this.listingRepo.save(theListing);
+
 
 
   }

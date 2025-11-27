@@ -7,9 +7,6 @@ export class UploadFileDraftListingDTO implements UploadFileDraftListingRequest 
   @IsEnum(ContentTypes)
   contentType: ContentTypes;
 
-  @ApiProperty({ type: "number" })
-  @IsNumber()
-  size: number;
 
   @ApiProperty({ required: false })
   @IsString()

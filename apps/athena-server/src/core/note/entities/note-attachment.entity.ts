@@ -1,8 +1,6 @@
-import { NoteAttachment as INoteAttachment } from "@athena/types";
+import { ContentTypes, NoteAttachment as INoteAttachment } from "@athena/types";
 import { Column, CreateDateColumn, Entity, ForeignKey, Index, OneToOne, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { Note } from "./note.entity";
-import { ContentTypes } from "src/engine/storage/types/storage.types";
-
 @Entity('attachment')
 @Index('UQ_ATTACHMENT_KEY', ['key'], { unique: true })
 export class NoteAttachment implements INoteAttachment {

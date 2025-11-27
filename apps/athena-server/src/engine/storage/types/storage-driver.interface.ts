@@ -1,5 +1,6 @@
+import { ContentTypes } from '@athena/types';
 import { Readable } from 'stream';
-import { ContentTypes } from './storage.types';
+import { UploadCallback, UploadInstruction } from '@athena/types'
 
 export interface StorageDriver {
   delete(params: { folderPath: string; filename?: string }): Promise<void>;
@@ -30,9 +31,20 @@ export interface StorageDriver {
     filename: string;
   }): Promise<boolean>;
   checkFolderExists?(folderPath: string): Promise<boolean>;
-  getSignedUrl?(params: {
-    folderPath: string;
-    filename: string;
+  /**
+  * get read-only public or signed url
+    */
+  getUrl?(params: {
+    key: string,
+    expiresInSeconds?: number
+  }): string;
+  /**
+  * get write or upload url
+  */
+  getUploadUrl?(params: {
+    key: string,
     expiresInSeconds?: number;
-  }): Promise<string>;
+  }): string
+
+  getUploadInstruction(url?: string, callback?: UploadCallback): UploadInstruction
 }

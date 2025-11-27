@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { StorageService } from "src/engine/storage/services/storage.service";
-import { ContentTypes } from "src/engine/storage/types/storage.types";
 import { Note } from "../entities/note.entity";
-import { StorageDomain, StorageKeyService, StoragePurpose } from "src/engine/storage/services/storage-key.service";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { NoteAttachment } from "../entities/note-attachment.entity";
+import { UploadDomain } from "src/engine/storage/enums/upload-domain.enum";
+import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
+import { UploadService } from "src/engine/storage/services/upload.service";
+import { ContentTypes } from "@athena/types";
 
 /**
  * Handling note's attachments
@@ -16,29 +18,20 @@ export class AttachmentService {
 
   constructor(
     @InjectRepository(NoteAttachment) private readonly attachmentRepo: Repository<NoteAttachment>,
-    private readonly storageService: StorageService, private readonly storageKey: StorageKeyService) {
+    private readonly uploadService: UploadService, private readonly storageService: StorageService) {
 
   }
 
-  generateFileKey(noteId: string, mediaType: ContentTypes) {
-    return this.storageKey.create({
-      ownerId: noteId,
-      domain: StorageDomain.NOTE,
-      purpose: StoragePurpose.ATTACHMENT,
-      extension: mediaType === ContentTypes.JPEG ? "jpeg" : mediaType === ContentTypes.PNG ? "png" : "webp"
-    })
-
-  }
-
-  async getUploadUrl(userId: string, mimeType: ContentTypes) {
-    const key = this.generateFileKey(userId, mimeType);
-    const url = await this.storageService.getUrl({
-      contentType: mimeType,
-      key: key,
+  async getUploadUrl(noteId: string, mimeType: ContentTypes) {
+    const uploadJob = await this.uploadService.createUpload({
+      domain: UploadDomain.NOTE,
+      purpose: UploadPurpose.ATTACHMENT,
+      referenceId: noteId,
+      contentType: mimeType
     })
 
 
-    return url
+    return uploadJob.url
 
   }
 
@@ -60,18 +53,14 @@ export class AttachmentService {
     return `attachment://${id}`;
   }
 
-
   async attachFileToNote(noteId: string, key: string) {
     // TODO: Throw exception if note not found
-    //
     const attachment = this.attachmentRepo.create({
       key: key,
       noteId: noteId,
     })
 
     return await this.attachmentRepo.save(attachment);
-
-
 
   }
 

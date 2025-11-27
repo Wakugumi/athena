@@ -1,8 +1,9 @@
-import { ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { DraftListingCommand } from "../draft-listing.command";
 import { Listing } from "../../entities/listing.entity";
 import { ListingService } from "../../services/listing.service";
 
+@CommandHandler(DraftListingCommand)
 export class DraftListingHandler implements ICommandHandler<DraftListingCommand> {
 
 
@@ -13,7 +14,8 @@ export class DraftListingHandler implements ICommandHandler<DraftListingCommand>
 
   async execute(command: DraftListingCommand): Promise<Listing> {
     return await this.listingService.draftListing({
-      ownerId: command.userId
+      ownerId: command.userId,
+      title: "My New List"
     })
 
   }

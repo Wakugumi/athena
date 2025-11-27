@@ -1,27 +1,30 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { SearchListingQuery } from "../queries/search-listing.query";
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
-import { CreateDraftListingCommand } from "../commands/create-draft-listing.command";
 import { CurrentUser } from "src/engine/auth/decorators/current-user.decorator";
 import { User } from "src/core/user/user.entity";
-import { Listing } from "../entities/listing.entity";
-import { UpdateDraftListingDto } from "../dtos/update-listing.dto";
-import { UpdateDraftListingCommand } from "../commands/update-draft-listing.command";
-import { PublishListingRequest } from "@athena/types";
-import { PublishListingCommand } from "../commands/publish-listing.command";
-import { UploadFileDraftListingDTO } from "../dtos/upload-file-draft-listing.dto";
-import { UploadFileListingCommand } from "../commands/upload-file-listing.command";
+import { Listing } from "./entities/listing.entity";
 import { Public } from "src/engine/auth/decorators/public-guard.decorator";
-import { FetchListingQuery } from "../queries/fetch-listing.query";
-import { FetchListingResponseDTO } from "../dtos/fetch-listing.output";
-import { FetchDraftListingsQuery } from "../queries/fetch-draft-listings.query";
-import { PublishListingDto } from "../dtos/publish-listing.dto";
+import { SearchListingQuery } from "./queries/search-listing.query";
+import { FetchListingsQuery } from "./queries/fetch-listings.query";
+import { ListingStatus, UploadInstruction, Visibility } from "@athena/types";
+import { DraftListingCommand } from "./commands/draft-listing.command";
+import { UpdateDraftListingDto } from "../market/dtos/update-listing.dto";
+import { UpdateDraftListingCommand } from "./commands/update-draft-listing.command";
+import { UploadFileDraftListingDTO } from "../market/dtos/upload-file-draft-listing.dto";
+import { UploadFileListingCommand } from "./commands/upload-file-listing.command";
+import { PublishListingDto } from "../market/dtos/publish-listing.dto";
+import { PublishListingCommand } from "./commands/publish-listing.command";
+import { FetchListingResponseDTO } from "../market/dtos/fetch-listing.output";
+import { CustomExceptionFilter } from "src/utils/exception.filter";
+import { HttpStatusCode } from "axios";
+import { ApiResponseDto } from "src/utils/api-response-wrapper.util";
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
 @UsePipes(new ValidationPipe())
+@UseFilters(new CustomExceptionFilter())
 export class ListingController {
 
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) { }
@@ -49,8 +52,8 @@ export class ListingController {
     }
   )
   async getDrafts(@CurrentUser() user: User): Promise<Listing[]> {
-    return await this.queryBus.execute<FetchDraftListingsQuery>(
-      new FetchDraftListingsQuery(user.id)
+    return await this.queryBus.execute<FetchListingsQuery>(
+      new FetchListingsQuery(user.id, undefined, undefined, Visibility.DRAFT)
     )
   }
 
@@ -63,8 +66,8 @@ export class ListingController {
     }
   )
   async getDraft(@CurrentUser() user: User, @Param('id') listingId: string): Promise<Listing> {
-    const listings = await this.queryBus.execute<FetchDraftListingsQuery>(
-      new FetchDraftListingsQuery(user.id, listingId)
+    const listings = await this.queryBus.execute<FetchListingsQuery>(
+      new FetchListingsQuery(user.id, listingId, undefined, Visibility.DRAFT, ListingStatus.DRAFT)
     )
 
     return listings[0];
@@ -78,8 +81,8 @@ export class ListingController {
     summary: "Request to create new draft", description: "Request create draft listing, will create new record of Listing marked as draft, then return as response"
   })
   async draft(@CurrentUser() user: User): Promise<Partial<Listing>> {
-    return await this.commandBus.execute<CreateDraftListingCommand>(
-      new CreateDraftListingCommand(user.id)
+    return await this.commandBus.execute<DraftListingCommand>(
+      new DraftListingCommand(user.id)
     )
   }
 
@@ -97,15 +100,16 @@ export class ListingController {
   @Post('draft/upload')
   @ApiBody({ type: UploadFileDraftListingDTO })
   @ApiBearerAuth()
-  async uploadFile(@CurrentUser() user: User, @Body() payload: UploadFileDraftListingDTO): Promise<{ key: string, url: string }> {
+  async uploadFile(@CurrentUser() user: User, @Body() payload: UploadFileDraftListingDTO): Promise<UploadInstruction> {
     return await this.commandBus.execute<UploadFileListingCommand>(
-      new UploadFileListingCommand(user.id, payload.contentType, payload.size, payload.listingId)
+      new UploadFileListingCommand(user.id, payload.contentType, payload.listingId)
     )
 
   }
 
   @Post('publish')
   @ApiBody({ type: PublishListingDto })
+  @ApiOkResponse({ type: ApiResponseDto<Partial<Listing>> })
   @ApiBearerAuth()
   async publish(@CurrentUser() user: User, @Body() payload: PublishListingDto): Promise<Partial<Listing>> {
     return await this.commandBus.execute<PublishListingCommand>
@@ -119,14 +123,18 @@ export class ListingController {
   @Get(':id')
   @Public()
   @ApiBearerAuth()
-  @ApiQuery({ name: "id", description: "Listing Id" })
+  @ApiParam({ name: "id", description: "Listing Id" })
   @ApiOperation({ description: "Fetch a detailed PUBLISHED listing only, with Private or Public visibility" })
   @ApiOkResponse({ type: FetchListingResponseDTO })
   async get(@Param('id') listingId: string) {
-    return await this.queryBus.execute<FetchListingQuery>(
-      new FetchListingQuery(listingId)
-    )
+    const result = (await this.queryBus.execute<FetchListingsQuery>(
+      new FetchListingsQuery(undefined, listingId, undefined, undefined, ListingStatus.PUBLISHED)
+    ))[0]
 
+    if (!result)
+      throw new HttpException("Listing not exist", HttpStatusCode.NotFound)
+
+    return result
   }
 
 

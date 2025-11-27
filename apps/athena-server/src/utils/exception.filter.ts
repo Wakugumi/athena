@@ -1,16 +1,15 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
-import { HttpAdapterHost } from "@nestjs/core";
 import { CustomException } from "./custom-exception";
+import { Request, Response } from 'express'
 
-@Catch()
+@Catch(CustomException)
 export class CustomExceptionFilter implements ExceptionFilter {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
-
-  catch(exception: any, host: ArgumentsHost) {
-    const { httpAdapter } = this.httpAdapterHost;
+  catch(exception: CustomException, host: ArgumentsHost) {
     const context = host.switchToHttp()
-    const status = exception instanceof CustomException ? exception.httpStatusCode : exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR
-    const message = exception instanceof CustomException ? exception.message : exception instanceof HttpException ? exception.message : (exception as Error).message;
+    const status = exception instanceof CustomException ? exception.httpStatusCode : HttpStatus.INTERNAL_SERVER_ERROR
+    const message = exception instanceof CustomException ? exception.message : (exception as Error).message;
+    const request = context.getRequest<Request>()
+    const response = context.getResponse<Response>();
 
     const responseBody = {
 
@@ -19,12 +18,12 @@ export class CustomExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString()
 
       ,
-      path: httpAdapter.getRequestUrl(context.getRequest())
+      path: request.url
     }
 
 
+    response.status(status!).json(responseBody)
 
-    httpAdapter.reply(context.getResponse(), responseBody, status)
   }
 
 }

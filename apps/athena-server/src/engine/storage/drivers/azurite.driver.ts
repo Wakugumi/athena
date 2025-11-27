@@ -4,6 +4,9 @@ import {
   generateBlobSASQueryParameters,
   BlobSASPermissions,
   StorageSharedKeyCredential,
+  BlobSASSignatureValues,
+  SASProtocol,
+  BlobClient,
 } from '@azure/storage-blob';
 import { StorageDriver } from '../types/storage-driver.interface';
 import {
@@ -16,18 +19,17 @@ import { mkdir } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import { AzureBlobOptions } from '../types/storage.types';
-import { Inject, Logger } from '@nestjs/common';
-import { STORAGE_OPTIONS, UPLOAD_CALLBACK_URL } from '../types/storage.tokens';
+import { Logger } from '@nestjs/common';
 import { UploadCallback, UploadInstruction } from '@athena/types';
 
-export class AzureDriver implements StorageDriver {
-  private client: BlobServiceClient;
-  private readonly logger = new Logger(AzureDriver.name);
+export class AzuriteDriver implements StorageDriver {
+  private client: ContainerClient;
+  private readonly logger = new Logger(AzuriteDriver.name);
   private container: ContainerClient;
   private options: AzureBlobOptions;
   private sharedKeyCredential: StorageSharedKeyCredential;
 
-  constructor(@Inject(UPLOAD_CALLBACK_URL) private readonly apiUrl: string, @Inject(STORAGE_OPTIONS) options: AzureBlobOptions) {
+  constructor(options: AzureBlobOptions) {
     if (!options.accountKey) {
       throw new StorageException(
         "Only support authenticate with account key, usually paired with account name",
@@ -36,16 +38,13 @@ export class AzureDriver implements StorageDriver {
     }
     this.options = options;
     this.sharedKeyCredential = new StorageSharedKeyCredential(
-      options.accountName, options.accountKey
-    )
+      "devstoreaccount1", "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==")
+
+    this.container = new ContainerClient("DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;", options.container)
 
 
-    this.client = new BlobServiceClient(
-      `https://${options.accountName}.blob.core.windows.net`,
-      this.sharedKeyCredential
-    );
-
-    this.container = this.client.getContainerClient(options.container);
+    this.logger.log(`Creating Azurite instance, container ${options.container}`);
+    (async () => await this.container.createIfNotExists())()
   }
 
   async checkFileExists(params: {
@@ -192,73 +191,56 @@ export class AzureDriver implements StorageDriver {
       }
     }
   }
-
-  getSignedUrl(params: {
+  async getSignedUrl(params: {
     key: string
-    expiresInSeconds?: number,
-    permissions?: string
-  }): string {
-    const blobClient = this.container.getBlobClient(params.key);
+    expiresInSeconds?: number;
+  }): Promise<string> {
+
+
+    const blobClient = this.container.getBlobClient(params.key)
 
     if (!this.sharedKeyCredential) {
       throw new StorageException(
-        'Account key is required for generating signed URLs',
-        StorageExceptionCode.FILE_NOT_FOUND,
+        "Account key is required for generating signed URLs",
+        StorageExceptionCode.FILE_NOT_FOUND
       );
     }
 
     try {
-      const expiresOn = new Date();
-      expiresOn.setSeconds(
-        expiresOn.getSeconds() + (params.expiresInSeconds || 3600),
-      );
-
-      const sasOptions = {
+      const now = Date.now();
+      this.logger.log(`INITIATING SAS GENERATION ${this.options.container}/${params.key}`)
+      const sasOptions: BlobSASSignatureValues = {
         containerName: this.options.container,
-        blobName: params.key,
-        permissions: BlobSASPermissions.parse(params.permissions ?? 'cw'), // read permission
-        startsOn: new Date(),
-        expiresOn,
+        permissions: BlobSASPermissions.parse("cw"),
+        expiresOn: new Date(now + 5 * 60 * 1000)
       };
 
       const sasToken = generateBlobSASQueryParameters(
         sasOptions,
-        this.sharedKeyCredential,
+        this.sharedKeyCredential
       ).toString();
 
+      this.logger.log(`CREATED SAS TOKEN ${sasToken} \n ${params.key} ${this.options.container} \n ${this.sharedKeyCredential.accountName}`)
+
+
       return `${blobClient.url}?${sasToken}`;
+
     } catch (error) {
-      this.logger.error('Error generating signed URL:', error);
+      this.logger.error("Error generating signed URL:", error);
       throw new StorageException(
-        'Failed to generate signed URL',
-        StorageExceptionCode.FAILED_GENERATE_SAS,
+        "Failed to generate signed URL",
+        StorageExceptionCode.FILE_NOT_FOUND
       );
     }
   }
-
-  getUploadUrl(params: { key: string; }): string {
-    return this.getSignedUrl({ key: params.key, permissions: 'cw' });
-
-  }
-
-  getUrl(params: { key: string; expiresInSeconds?: number; }): string {
-    return this.getSignedUrl({
-      key: params.key, expiresInSeconds: params.expiresInSeconds, permissions: "r"
-
-    })
-  }
-
   getUploadInstruction(url?: string, callback?: UploadCallback): UploadInstruction {
+    return {} as any
+  }
 
-    return {
-      method: "PUT",
-      headers: {
-        "x-ms-blob-type": "BlobType"
-      },
-      url: url,
-      callback: callback
-
-    }
-
+  getUploadUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    return ""
+  }
+  getUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    return ""
   }
 }

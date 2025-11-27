@@ -1,9 +1,9 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { SearchListingQuery } from "../queries/search-listing.query";
-import { Listing } from "../entities/listing.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ListingStatus, Visibility } from "@athena/types";
+import { Listing } from "src/core/listing/entities/listing.entity";
+import { SearchListingQuery } from "../search-listing.query";
 
 @QueryHandler(SearchListingQuery)
 export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
@@ -30,9 +30,9 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
 
     if (query.seller) {
       const cols = ['username', 'firstName', 'lastName'];
-      q.leftJoin('x.seller', 'seller')
+      q.leftJoin('x.owner', 'owner')
       q.andWhere(
-        cols.map(col => `seller.${col} ILIKE :q`)
+        cols.map(col => `owner.${col} ILIKE :q`)
           .join(' OR '),
         { q: `%${query.seller}%` }
       )
@@ -40,7 +40,7 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
     }
 
 
-    q.leftJoinAndSelect('x.seller', 'seller');
+    q.leftJoinAndSelect('x.owner', 'owner');
 
 
     return await q.getMany()

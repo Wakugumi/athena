@@ -14,7 +14,8 @@ import { ListingStatus } from "../enums/listing-status.enum";
 
 export interface ListingItem {
   id: string;
-  blobKey: string;
+  blobKey?: string | null;
+  status: "PENDING" | "READY"
   title: string;
   listingId: ID;
   /**

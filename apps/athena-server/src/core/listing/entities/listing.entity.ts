@@ -30,7 +30,7 @@ export class Listing implements IListing {
   @Column({ type: "enum", enum: License, enumName: 'license', default: License.OPEN })
   license: License;
 
-  @OneToMany(() => ListingItem, (item) => item.listing)
+  @OneToMany(() => ListingItem, (item) => item.listing, { eager: true })
   items: Relation<ListingItem[]>
 
 

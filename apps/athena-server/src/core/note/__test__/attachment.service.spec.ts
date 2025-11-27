@@ -1,12 +1,12 @@
-import { Test, TestingModule } from "@nestjs/testing"
+import { Test } from "@nestjs/testing"
 import { AttachmentService } from "../services/attachment.service"
 import { StorageService } from "apps/athena-server/src/engine/storage/services/storage.service"
-import { } from '@athena/types'
-import { ContentTypes } from "apps/athena-server/src/engine/storage/types/storage.types"
 import { getRepositoryToken } from "@nestjs/typeorm"
 import { NoteAttachment } from "../entities/note-attachment.entity"
 import { StorageKeyService } from "src/engine/storage/services/storage-key.service"
 import { randomUUID } from "crypto"
+import { UploadService } from "src/engine/storage/services/upload.service"
+import { ContentTypes } from "@athena/types"
 
 describe("AttachmentsService", () => {
   let attachment: AttachmentService
@@ -17,6 +17,10 @@ describe("AttachmentsService", () => {
   let storageKey = {
     create: jest.fn(),
   }
+  let upload = {
+    createUpload: jest.fn()
+
+  }
 
   let storageKeyMock = randomUUID();
 
@@ -24,11 +28,14 @@ describe("AttachmentsService", () => {
 
 
     const module = await Test.createTestingModule({
-
       providers: [AttachmentService,
         {
           provide: StorageService,
           useValue: storage
+        },
+        {
+          provide: UploadService,
+          useValue: upload
         },
         {
           provide: StorageKeyService,
@@ -44,11 +51,11 @@ describe("AttachmentsService", () => {
           }
         }
       ],
-
-
     }).compile()
+
     attachment = module.get(AttachmentService);
     storage = module.get(StorageService);
+    upload = module.get(UploadService);
     storageKey = module.get(StorageKeyService);
 
     jest.clearAllMocks();
@@ -66,17 +73,17 @@ describe("AttachmentsService", () => {
 
 
     it('get sign url', async () => {
-      const mockUrl = "test";
-      storage.getUrl.mockReturnValueOnce(mockUrl);
+      const mockJob = {
+        key: "key",
+        url: "url"
+      }
+      upload.createUpload.mockReturnValueOnce(mockJob);
 
       const url = await attachment.getUploadUrl("testId", ContentTypes.JPEG);
 
-      expect(storage.getUrl).toHaveBeenCalled();
+      expect(upload.createUpload).toHaveBeenCalled();
 
-      expect(url).toEqual(mockUrl)
-
-
-
+      expect(url).toEqual(mockJob.url)
     })
 
     it('get public url', async () => {

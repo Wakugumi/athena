@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StorageService } from '../services/storage.service';
 import { StorageDriverFactory } from '../storage-driver.factory';
-import { ContentTypes } from '../types/storage.types';
 import { STORAGE_OPTIONS } from '../types/storage.tokens';
+import { ContentTypes } from '@athena/types';
 
 describe('StorageService', () => {
   let service: StorageService;

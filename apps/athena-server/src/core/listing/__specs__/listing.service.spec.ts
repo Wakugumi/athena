@@ -15,15 +15,18 @@ import { StorageModule } from 'src/engine/storage/storage.module';
 import { ListingModule } from 'src/core/listing/listing.module';
 import { AthenaConfigModule } from 'src/engine/athena-config/athena-config.module'
 import { observeNotification } from "rxjs/internal/Notification";
+import { UploadService } from "src/engine/storage/services/upload.service";
+import { ListingItem } from "../entities/listing-item.entity";
 
 
 describe('Listing Service', () => {
 
   let service: ListingService
   let eventEmitter: EventEmitter2;
-  let storageService = {
-    getUrl: jest.fn(),
-    getPublicUrl: jest.fn()
+  let uploadService = {
+    createUpload: jest.fn(),
+    markComplete: jest.fn()
+
   }
   let storageKeyService = {
     create: jest.fn(),
@@ -34,8 +37,10 @@ describe('Listing Service', () => {
     findBy: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
+    findOneByOrFail: jest.fn()
   }
   let listingRepo = mockRepository;
+  let listingItemRepo = mockRepository;
 
   beforeEach(async () => {
 
@@ -45,8 +50,8 @@ describe('Listing Service', () => {
       providers: [
         ListingService,
         {
-          provide: StorageService,
-          useValue: storageService
+          provide: UploadService,
+          useValue: uploadService
         },
         {
           provide: StorageKeyService,
@@ -67,6 +72,10 @@ describe('Listing Service', () => {
           provide: getRepositoryToken(Listing),
           useValue: mockRepository
         },
+        {
+          provide: getRepositoryToken(ListingItem),
+          useValue: mockRepository
+        },
         EventEmitter2
       ]
 
@@ -75,10 +84,11 @@ describe('Listing Service', () => {
 
 
     service = module.get(ListingService);
-    storageService = module.get(StorageService)
+    uploadService = module.get(UploadService)
     storageKeyService = module.get(StorageKeyService)
     eventEmitter = module.get(EventEmitter2)
     listingRepo = module.get(getRepositoryToken(Listing))
+    listingItemRepo = module.get(getRepositoryToken(ListingItem))
 
     jest.clearAllMocks()
   });
@@ -119,6 +129,10 @@ describe('Listing Service', () => {
       id: "1"
     }
 
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
     it('ensure draft match owners', async () => {
       listingRepo.findOneBy.mockResolvedValueOnce(mockListing)
       expect(await service.ensureUserOwnsListing(mockUser.id, mockListing.id)).toBeUndefined()
@@ -126,7 +140,7 @@ describe('Listing Service', () => {
     });
 
     it('ensure listing is under draft state', async () => {
-      listingRepo.findOneBy.mockResolvedValueOnce(mockListing);
+      listingRepo.findOneByOrFail.mockResolvedValueOnce(mockListing);
       expect(await service.ensureDraft(mockListing.id)).toBeUndefined()
     });
 
@@ -162,8 +176,8 @@ describe('Listing Service', () => {
         title: "update"
       }
 
-      listingRepo.findOneBy.mockResolvedValueOnce(updatedDraft)
-
+      listingRepo.findOneByOrFail.mockResolvedValueOnce(existingDraft)
+      listingRepo.update.mockResolvedValueOnce(updatedDraft)
       listingRepo.findOneBy.mockResolvedValueOnce(updatedDraft)
       const result = await service.updateDraft(existingDraft.id!, { title: "update" })
       expect(listingRepo.update).toHaveBeenCalledWith(existingDraft.id, { title: "update" })
@@ -173,11 +187,12 @@ describe('Listing Service', () => {
 
     it('should not update published listing', async () => {
       let existingListing: Partial<Listing> = {
-        ...mockListing,
+        id: "1",
         visibility: Visibility.PRIVATE,
         status: ListingStatus.PUBLISHED
       }
 
+      listingRepo.findOneByOrFail.mockResolvedValueOnce(existingListing)
       expect.assertions(2)
       try {
         await service.updateDraft(existingListing.id!, { title: "update" });
@@ -189,7 +204,7 @@ describe('Listing Service', () => {
 
     it('should publish', async () => {
       let mockDraft = {
-        ...mockListing,
+        id: "1",
         visibility: Visibility.DRAFT,
         status: ListingStatus.READY
       }

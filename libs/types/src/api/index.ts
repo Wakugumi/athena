@@ -15,3 +15,5 @@ export * from './responses/user.response'
 
 export * from './requests/auth.request';
 export * from './responses/auth.response'
+
+export * from './upload'

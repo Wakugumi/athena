@@ -1,17 +1,18 @@
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { AttachmentService } from '../services/attachment.service';
-import { StorageDomain, StorageKeyService, StoragePurpose } from 'src/engine/storage/services/storage-key.service';
 import { StorageEvents } from 'src/engine/storage/enums/storage-events.enum';
 import { FileUploadedEvent } from 'src/engine/storage/events/file-uploaded.event';
-import { StorageUploadEvent } from 'src/engine/storage/types/storage-upload-event.type';
+import { UploadDomain } from 'src/engine/storage/enums/upload-domain.enum';
+import { UploadPurpose } from 'src/engine/storage/enums/upload-purpose.enum';
+import { UploadService } from 'src/engine/storage/services/upload.service';
 
 @Injectable()
 export class NoteStorageSubscriber {
   constructor(
     private readonly attachmentService: AttachmentService,
-    @Inject(StorageKeyService) private readonly key: StorageKeyService,
+    private readonly uploadService: UploadService,
   ) { }
 
 
@@ -20,21 +21,15 @@ export class NoteStorageSubscriber {
   * Handle attachment record when file is uploaded
   */
   @OnEvent(StorageEvents.FILE_UPLOADED)
-  async handleNoteAttachment(event: StorageUploadEvent) {
-    const { key } = event;
+  async handleNoteAttachment(event: FileUploadedEvent) {
+    if (event.domain !== UploadDomain.NOTE && event.purpose !== UploadPurpose.ATTACHMENT) return;
 
 
-    const { domain, ownerId, purpose, extension, filename } = this.key.splitKey(key);
-
-    // Route by prefix
-    if (!key.includes(`/${StorageDomain.NOTE}/`)) return;
-    if (purpose !== StoragePurpose.ATTACHMENT) return;
-
+    const uploadJob = await this.uploadService.lookupJob(event.uploadId)
 
     await this.attachmentService.attachFileToNote(
-      ownerId,
-      key
-
+      uploadJob.referenceId,
+      uploadJob.key
     );
 
   }
