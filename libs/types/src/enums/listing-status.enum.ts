@@ -2,7 +2,9 @@ export enum ListingStatus {
   DRAFT = 'DRAFT',
   PROCESSING = 'PROCESSING',
   READY = "READY",
-  PUBLISHED = 'PUBLISHED'
+  PUBLISHED = 'PUBLISHED',
+  UNLISTED = 'UNLISTED',
+  DELETED = 'DELETED'
 
 
 }

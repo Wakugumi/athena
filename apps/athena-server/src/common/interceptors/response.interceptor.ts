@@ -1,6 +1,7 @@
 import { ApiResponse } from '@athena/types';
 import { BadRequestException, CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { CustomException } from 'src/utils/custom-exception';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
@@ -31,7 +32,9 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiResponse<T>
         const status =
           error instanceof HttpException
             ? error.getStatus()
-            : HttpStatus.INTERNAL_SERVER_ERROR;
+            : error instanceof CustomException
+              ? error.httpStatusCode
+              : HttpStatus.INTERNAL_SERVER_ERROR;
 
         let message =
           error instanceof HttpException

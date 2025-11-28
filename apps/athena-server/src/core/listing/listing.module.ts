@@ -13,10 +13,12 @@ import { ListingController } from "./listing.controller";
 import { UploadFileListingHandler } from "./commands/handlers/upload-file.listing.handler";
 import { ListingStorageSubscriber } from "./events/subscribers/listing-storage.subscriber";
 import { ListingSubscriber } from "./events/subscribers/listing.subscriber";
+import { DeleteDraftListingHandler } from "./commands/handlers/delete-draft-listing.handler";
+import { TakedownListingHandler } from "./commands/handlers/takedown-listing.handler";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Listing, ListingItem]), StorageModule],
-  providers: [ListingService, FetchListingsHandler, SearchListingHandler, PublishListingHandler, UpdateDraftListingHandler, DraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber, ListingSubscriber],
+  providers: [ListingService, FetchListingsHandler, SearchListingHandler, PublishListingHandler, UpdateDraftListingHandler, DraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber, ListingSubscriber, DeleteDraftListingHandler, TakedownListingHandler],
   controllers: [ListingController],
   exports: [TypeOrmModule, ListingService]
 })

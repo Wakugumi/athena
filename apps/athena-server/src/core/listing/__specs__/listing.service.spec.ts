@@ -17,16 +17,25 @@ import { AthenaConfigModule } from 'src/engine/athena-config/athena-config.modul
 import { observeNotification } from "rxjs/internal/Notification";
 import { UploadService } from "src/engine/storage/services/upload.service";
 import { ListingItem } from "../entities/listing-item.entity";
+import { mock } from "node:test";
+import { ListingEvents } from "../enums/listing-events.enum";
+import { ListingDeleteEvent } from "../events/listing-delete.event";
 
 
 describe('Listing Service', () => {
 
   let service: ListingService
-  let eventEmitter: EventEmitter2;
+  let eventEmitter = {
+    emit: jest.fn()
+  }
   let uploadService = {
     createUpload: jest.fn(),
     markComplete: jest.fn()
 
+  }
+  let storage = {
+    splitKey: jest.fn(),
+    delete: jest.fn()
   }
   let storageKeyService = {
     create: jest.fn(),
@@ -37,7 +46,9 @@ describe('Listing Service', () => {
     findBy: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
-    findOneByOrFail: jest.fn()
+    findOneByOrFail: jest.fn(),
+    delete: jest.fn(),
+    softDelete: jest.fn()
   }
   let listingRepo = mockRepository;
   let listingItemRepo = mockRepository;
@@ -49,6 +60,10 @@ describe('Listing Service', () => {
 
       providers: [
         ListingService,
+        {
+          provide: StorageService,
+          useValue: storage
+        },
         {
           provide: UploadService,
           useValue: uploadService
@@ -76,7 +91,10 @@ describe('Listing Service', () => {
           provide: getRepositoryToken(ListingItem),
           useValue: mockRepository
         },
-        EventEmitter2
+        {
+          provide: EventEmitter2,
+          useValue: eventEmitter
+        }
       ]
 
 
@@ -89,6 +107,7 @@ describe('Listing Service', () => {
     eventEmitter = module.get(EventEmitter2)
     listingRepo = module.get(getRepositoryToken(Listing))
     listingItemRepo = module.get(getRepositoryToken(ListingItem))
+    storage = module.get(StorageService)
 
     jest.clearAllMocks()
   });
@@ -240,6 +259,108 @@ describe('Listing Service', () => {
 
 
 
+    });
+
+    it('should takedown listing', async () => {
+      let existing = {
+        ...mockListing,
+        status: ListingStatus.PUBLISHED,
+        visibility: Visibility.PUBLIC
+      }
+
+      listingRepo.findOneBy.mockResolvedValueOnce(existing);
+
+      listingRepo.findOneBy.mockResolvedValueOnce(existing);
+
+      const result = await service.takedownListing("1", existing.id)
+
+      expect(listingRepo.update).toHaveBeenCalledWith({ id: existing.id }, expect.anything())
+      expect(result).toEqual({
+        ...existing,
+        status: ListingStatus.UNLISTED,
+        visibility: Visibility.DRAFT,
+        archivedAt: expect.anything()
+      })
+
+    })
+
+    it('should mark draft for deletion', async () => {
+      let existing = {
+        ...mockListing,
+        visibility: Visibility.DRAFT,
+        status: ListingStatus.UNLISTED
+      }
+
+      listingRepo.findOneByOrFail.mockResolvedValueOnce(existing);
+      listingRepo.findOneBy.mockResolvedValueOnce(existing);
+
+      await service.deleteDraft(existing.ownerId, existing.id);
+
+      expect(listingRepo.update).toHaveBeenCalledWith({ id: existing.id }, { status: ListingStatus.DELETED })
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(ListingEvents.REMOVED, expect.any(ListingDeleteEvent))
+
+    });
+
+    describe('process deletion', () => {
+
+      it('throws when listing does not exist', async () => {
+        listingRepo.findOneBy.mockResolvedValue(null);
+
+        await expect(service.processDeletion('id123'))
+          .rejects.toThrow('Listing not found');
+      });
+
+      it('throws when listing is not marked DELETED', async () => {
+        listingRepo.findOneBy.mockResolvedValue({
+          id: 'id123',
+          status: 'ACTIVE',
+        });
+
+        await expect(service.processDeletion('id123'))
+          .rejects.toThrow('Listing is not marked for deletion');
+      });
+
+      it('deletes blobs and soft-deletes items', async () => {
+        listingRepo.findOneBy.mockResolvedValue({
+          id: 'id123',
+          status: 'DELETED',
+        });
+
+        listingItemRepo.findBy.mockResolvedValue([
+          { id: 'i1', blobKey: 'folder/name.jpg' },
+          { id: 'i2', blobKey: null }, // skip
+        ]);
+
+        storage.splitKey.mockReturnValue({
+          folder: 'folder',
+          name: 'name.jpg',
+        });
+
+        await service.processDeletion('id123');
+
+        expect(storage.splitKey).toHaveBeenCalledWith('folder/name.jpg');
+        expect(storage.delete).toHaveBeenCalledWith({
+          folderPath: 'folder',
+          filename: 'name.jpg',
+        });
+
+        expect(listingItemRepo.softDelete).toHaveBeenCalledWith({ id: 'i1' });
+        expect(listingItemRepo.softDelete).not.toHaveBeenCalledWith({ id: 'i2' });
+      });
+
+      it('soft-deletes the listing', async () => {
+        listingRepo.findOneBy.mockResolvedValue({
+          id: 'id123',
+          status: 'DELETED',
+        });
+
+        listingItemRepo.findBy.mockResolvedValue([]);
+
+        await service.processDeletion('id123');
+
+        expect(listingRepo.softDelete).toHaveBeenCalledWith({ id: 'id123' });
+      });
     })
 
 

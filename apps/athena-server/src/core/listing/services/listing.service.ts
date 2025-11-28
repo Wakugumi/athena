@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 import { Listing } from "../entities/listing.entity";
@@ -12,15 +12,19 @@ import { UploadService } from "src/engine/storage/services/upload.service";
 import { UploadDomain } from "src/engine/storage/enums/upload-domain.enum";
 import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
 import { ListingItem } from "../entities/listing-item.entity";
+import { ListingDeleteEvent } from "../events/listing-delete.event";
+import { StorageService } from "src/engine/storage/services/storage.service";
 
 @Injectable()
 export class ListingService {
+  private readonly logger = new Logger(ListingService.name)
 
   constructor(
     @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
     @InjectRepository(ListingItem) private readonly listingItemRepo: Repository<ListingItem>,
     private readonly uploadService: UploadService,
-    private readonly eventEmitter: EventEmitter2) { }
+    private readonly eventEmitter: EventEmitter2,
+    private readonly storageService: StorageService) { }
 
 
   async ensureUserOwnsListing(userId: string, listingId: string) {
@@ -35,7 +39,7 @@ export class ListingService {
   async ensureDraft(listingId: string) {
     const found = await this.listingRepo.findOneByOrFail({ id: listingId })
     if (found.visibility !== Visibility.DRAFT)
-      throw new ListingException("Cannot edit publised draft", ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Cannot update Listing that is not in draft state", HttpStatus.BAD_REQUEST)
+      throw new ListingException("Listing is not in draft state", ListingExceptionCode.LISTING_ALREADY_PUBLISHED, "Cannot update Listing that is not in draft state", HttpStatus.BAD_REQUEST)
 
 
     return;
@@ -126,8 +130,66 @@ export class ListingService {
     }
     await this.listingRepo.save(theListing);
 
+  }
+
+  async takedownListing(userId: string, listingId: string): Promise<Listing> {
+
+    const listing = await this.listingRepo.findOneBy({ id: listingId });
+
+    if (!listing)
+      throw new ListingException("Listing not found", ListingExceptionCode.LISTING_NOT_EXIST, "No listing found to be taken down", HttpStatus.NOT_FOUND);
+
+    await this.ensureUserOwnsListing(userId, listingId);
+
+    if (listing.status !== ListingStatus.PUBLISHED || listing.visibility === Visibility.DRAFT)
+      throw new ListingException("Listing is not published to be taken down", ListingExceptionCode.LISTING_NOT_PUBLISHED, "Can only take down published listing", HttpStatus.BAD_REQUEST)
+
+    listing.status = ListingStatus.UNLISTED;
+    listing.visibility = Visibility.DRAFT;
+    listing.archivedAt = Date.now().toString()
+
+    await this.listingRepo.update({ id: listingId }, listing);
+
+    return listing;
+
+  }
 
 
+  async deleteDraft(userId: string, listingId: string) {
+    await this.ensureDraft(listingId);
+    await this.ensureUserOwnsListing(userId, listingId);
+
+    await this.listingRepo.update({ id: listingId }, { status: ListingStatus.DELETED })
+
+    this.eventEmitter.emit(ListingEvents.REMOVED, new ListingDeleteEvent(listingId))
+
+  }
+
+  /**
+  * Processing Listing marked for deletion.
+  * Remove items and permanently deleting assoicated blobs
+  */
+  async processDeletion(listingId: string) {
+
+    const listing = await this.listingRepo.findOneBy({ id: listingId })
+    if (!listing)
+      throw new ListingException("Listing not found", ListingExceptionCode.LISTING_NOT_EXIST);
+    if (listing.status !== ListingStatus.DELETED)
+      throw new ListingException("Listing is not marked for deletion", ListingExceptionCode.LISTING_FALSE_MARK)
+
+
+    const items: ListingItem[] = await this.listingItemRepo.findBy({ listingId: listingId });
+
+
+    items.forEach(async item => {
+      if (!item.blobKey) return
+      const { folder, name } = this.storageService.splitKey(item.blobKey)
+      await this.storageService.delete({ folderPath: folder, filename: name })
+      await this.listingItemRepo.softDelete({ id: item.id })
+    })
+
+    await this.listingRepo.softDelete({ id: listingId });
+    this.logger.debug(`finale deletion of listing-${listingId}`)
   }
 
 

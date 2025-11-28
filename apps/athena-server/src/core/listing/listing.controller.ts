@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
@@ -20,6 +20,8 @@ import { FetchListingResponseDTO } from "../market/dtos/fetch-listing.output";
 import { CustomExceptionFilter } from "src/utils/exception.filter";
 import { HttpStatusCode } from "axios";
 import { ApiResponseDto } from "src/utils/api-response-wrapper.util";
+import { DeleteDraftListingCommand } from "./commands/delete-draft-listing.command";
+import { TakedownListingCommand } from "./commands/takedown-listing.command";
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
@@ -97,6 +99,17 @@ export class ListingController {
     )
   }
 
+  @Delete('draft/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete draft" })
+  async deleteDraft(@CurrentUser() user: User, @Param("id") listingId: string) {
+    return await this.commandBus.execute<DeleteDraftListingCommand>(
+      new DeleteDraftListingCommand(listingId, user.id)
+    )
+
+  }
+
+
   @Post('draft/upload')
   @ApiBody({ type: UploadFileDraftListingDTO })
   @ApiBearerAuth()
@@ -116,7 +129,15 @@ export class ListingController {
       (
         new PublishListingCommand(user.id, payload.id)
       )
+  }
 
+  @Post('takedown/:id')
+  @ApiOkResponse({ type: ApiResponseDto<Listing> })
+  @ApiBearerAuth()
+  async takedown(@CurrentUser() user: User, @Param('id') listingId: string) {
+    return await this.commandBus.execute<TakedownListingCommand>(
+      new TakedownListingCommand(user.id, listingId)
+    )
   }
 
 
