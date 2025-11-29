@@ -17,6 +17,10 @@ export function resolveFileExtension(contentType?: ContentTypes, filename?: stri
 
       case ContentTypes.MD:
         return 'md'
+      case ContentTypes.PDF:
+        return 'pdf'
+      default:
+        return ""
     }
 
 

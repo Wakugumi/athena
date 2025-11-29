@@ -5,6 +5,7 @@ import { USERNAME_REGEX } from "src/engine/auth/utils/auth.util";
 import { Wallet } from "../wallet/entities/wallet.entity";
 import { Order } from "../market/entities/order.entity";
 import { Listing } from "../listing/entities/listing.entity";
+import { Notification } from "src/engine/notification/notification.entity";
 
 @Entity('user')
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
@@ -60,5 +61,9 @@ export class User implements SharedUser {
 
   @OneToMany(() => Listing, (listing) => listing.owner)
   listings: Relation<Listing[]>
+
+  @OneToMany(() => Notification, (x) => x.user)
+  notifications: Relation<Notification[]>
+
 
 }

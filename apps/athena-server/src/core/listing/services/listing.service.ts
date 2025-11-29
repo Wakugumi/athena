@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 import { Listing } from "../entities/listing.entity";
-import { ContentTypes, ListingStatus, UploadInstruction, Visibility } from "@athena/types";
+import { ContentTypes, ListingStatus, NotificationCategory, UploadInstruction, Visibility } from "@athena/types";
 import { ListingException, ListingExceptionCode } from "../listing.exception";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { ListingEvents } from "../enums/listing-events.enum";
@@ -14,6 +14,8 @@ import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
 import { ListingItem } from "../entities/listing-item.entity";
 import { ListingDeleteEvent } from "../events/listing-delete.event";
 import { StorageService } from "src/engine/storage/services/storage.service";
+import { NotificationEvent } from "src/engine/notification/types/notification.constants";
+import { NotificationEventPayload } from "src/engine/notification/types/notification.types";
 
 @Injectable()
 export class ListingService {
@@ -83,9 +85,10 @@ export class ListingService {
     listing.status = ListingStatus.PUBLISHED
     listing.publishedAt = new Date().toISOString();
 
-    const saved = await this.listingRepo.save(listing)
+    const saved = await this.listingRepo.save(listing);
 
     this.eventEmitter.emit(ListingEvents.PUBLISHED, new ListingPublishedEvent(listingId));
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(listing.ownerId, NotificationCategory.LITSING, `[${listing.title}] is now public`));
     return saved;
   }
 
@@ -127,6 +130,7 @@ export class ListingService {
 
     if (theListing.itemsProcessedCount == theListing.itemsExpectedCount) {
       theListing.status = ListingStatus.READY
+
     }
     await this.listingRepo.save(theListing);
 
@@ -146,9 +150,12 @@ export class ListingService {
 
     listing.status = ListingStatus.UNLISTED;
     listing.visibility = Visibility.DRAFT;
-    listing.archivedAt = Date.now().toString()
+    listing.archivedAt = new Date().toUTCString()
 
     await this.listingRepo.update({ id: listingId }, listing);
+
+
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LITSING, `Your listing [${listing.title}] has been unlisted`))
 
     return listing;
 
@@ -158,10 +165,13 @@ export class ListingService {
   async deleteDraft(userId: string, listingId: string) {
     await this.ensureDraft(listingId);
     await this.ensureUserOwnsListing(userId, listingId);
+    const listing = await this.listingRepo.findOneBy({ id: listingId })
 
     await this.listingRepo.update({ id: listingId }, { status: ListingStatus.DELETED })
 
     this.eventEmitter.emit(ListingEvents.REMOVED, new ListingDeleteEvent(listingId))
+
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LITSING, `Your draft [${listing?.title}] has been deleted`))
 
   }
 
@@ -189,7 +199,7 @@ export class ListingService {
     })
 
     await this.listingRepo.softDelete({ id: listingId });
-    this.logger.debug(`finale deletion of listing-${listingId}`)
+    this.logger.debug(`finale deletion of listing - ${listingId}`)
   }
 
 

@@ -69,15 +69,20 @@ export class ListingStorageSubscriber {
     const newItem = await this.listingItemRepo.save({
       id: upload.id,
       listingId: upload.referenceId,
-      title: upload.key
+      title: upload.key,
+      status: "READY",
+      preview: preview,
+      blobKey: key,
+      contentType: upload.contentType
     })
 
     this.logger.log("Saved new Listing Item record", newItem.id)
 
-    await this.listingItemRepo.update({ id: newItem.id }, { status: "READY", preview: preview, blobKey: key })
 
-    theListing.preview = preview;
-    theListing.summary = preview;
+    if (!theListing.preview)
+      theListing.preview = preview;
+    if (!theListing.status)
+      theListing.summary = preview;
 
     await this.listingRepo.save(theListing)
 

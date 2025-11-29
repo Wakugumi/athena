@@ -253,7 +253,7 @@ export class AzureDriver implements StorageDriver {
     return {
       method: "PUT",
       headers: {
-        "x-ms-blob-type": "BlobType"
+        "x-ms-blob-type": "BlockBlob"
       },
       url: url,
       callback: callback

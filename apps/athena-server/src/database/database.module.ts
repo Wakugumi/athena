@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AthenaConfigModule } from "src/engine/athena-config/athena-config.module";
 import { AthenaConfigService } from "src/engine/athena-config/athena-config.service";
-import { NodeEnvironment } from "src/engine/athena-config/enums/node-environment.enum";
 
 @Module({
   imports: [

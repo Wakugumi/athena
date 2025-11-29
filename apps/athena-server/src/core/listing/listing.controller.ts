@@ -69,7 +69,7 @@ export class ListingController {
   )
   async getDraft(@CurrentUser() user: User, @Param('id') listingId: string): Promise<Listing> {
     const listings = await this.queryBus.execute<FetchListingsQuery>(
-      new FetchListingsQuery(user.id, listingId, undefined, Visibility.DRAFT, ListingStatus.DRAFT)
+      new FetchListingsQuery(user.id, listingId, undefined, Visibility.DRAFT, undefined)
     )
 
     return listings[0];
