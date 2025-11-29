@@ -14,6 +14,13 @@ export function resolveFileExtension(contentType?: ContentTypes, filename?: stri
 
       case ContentTypes.WEBP:
         return 'webp'
+
+      case ContentTypes.MD:
+        return 'md'
+      case ContentTypes.PDF:
+        return 'pdf'
+      default:
+        return ""
     }
 
 

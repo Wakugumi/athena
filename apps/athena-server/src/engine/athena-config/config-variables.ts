@@ -28,6 +28,13 @@ export class ConfigVariables {
   })
   NODE_ENV: NodeEnvironment = NodeEnvironment.PRODUCTION;
 
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ServerConfig,
+    description: 'URL of API endpoints',
+    type: ConfigVariableType.STRING
+  })
+  API_URL: string = 'http://localhost:3000/api';
+
 
 
   // DATABASE CONFIG

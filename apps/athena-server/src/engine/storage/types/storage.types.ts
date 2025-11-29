@@ -1,10 +1,6 @@
-export type UploadSource = string | Buffer | NodeJS.ReadableStream;
+import { ContentTypes } from "@athena/types";
 
-export enum ContentTypes {
-  JPEG = 'image/jpeg',
-  PNG = 'image/png',
-  WEBP = 'image/webp',
-}
+export type UploadSource = string | Buffer | NodeJS.ReadableStream;
 
 export interface StoredFile {
   key: string; // remote key / relative path
@@ -39,6 +35,7 @@ export interface UploadOptions {
 export enum StorageDriverOptions {
   LOCAL = 'LOCAL',
   AZURE = 'AZURE',
+  AZURITE = 'AZURITE'
 }
 
 /** Per-driver option shapes */

@@ -2,9 +2,11 @@ import { AttachmentService } from "./attachment.service";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Note } from "../entities/note.entity";
-import { ContentTypes } from "src/engine/storage/types/storage.types";
-import { StorageService } from "src/engine/storage/services/storage.service";
 import { NoteAttachment } from "../entities/note-attachment.entity";
+import { UploadService } from "src/engine/storage/services/upload.service";
+import { UploadDomain } from "src/engine/storage/enums/upload-domain.enum";
+import { UploadPurpose } from "src/engine/storage/enums/upload-purpose.enum";
+import { ContentTypes } from "@athena/types";
 
 /**
  * Transform image upload as Note
@@ -13,25 +15,21 @@ export class ImageAsNoteService {
 
   constructor(@InjectRepository(Note) private readonly noteRepo: Repository<Note>,
     private readonly attachmentService: AttachmentService,
-    private readonly storageService: StorageService) {
+    private readonly uploadService: UploadService) {
 
   }
 
   async uploadImage(userId: string, mimeType: ContentTypes) {
+    const uploadJob = await this.uploadService.createUpload(
+      {
+        contentType: mimeType,
+        domain: UploadDomain.NOTE,
+        purpose: UploadPurpose.UPLOADS,
+        referenceId: userId
+      }
+    )
 
-    const key = this.attachmentService.generateFileKey(userId, mimeType)
-    const url = await this.storageService.getUrl({
-      key: key,
-      contentType: mimeType
-      ,
-      signed: true
-    })
-
-
-    return {
-      key: key,
-      url: url
-    }
+    return uploadJob
 
   }
 

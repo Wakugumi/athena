@@ -11,11 +11,14 @@ import { Currency } from "../enums/currency.enum"; import { License } from "../e
 import { Visibility } from "../enums/visibility.enum";
 import { ID } from "../common/datatype.common";
 import { ListingStatus } from "../enums/listing-status.enum";
+import { ContentTypes } from "../enums";
 
 export interface ListingItem {
   id: string;
-  blobKey: string;
+  blobKey?: string | null;
+  status: "PENDING" | "READY"
   title: string;
+  contentType?: ContentTypes | null
   listingId: ID;
   /**
    * markdown of previews
@@ -29,7 +32,7 @@ export interface Listing {
   id: ID;
   /** Items in this listing */
   items: ListingItem[]
-  sellerId: ID;
+  ownerId: ID;
   title: string;
   description?: string | null;
   /**

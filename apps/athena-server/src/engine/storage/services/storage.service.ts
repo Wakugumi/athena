@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { STORAGE_OPTIONS, STORAGE_STRATEGY } from '../types/storage.tokens';
-import { ContentTypes, GetUrlOptions } from '../types/storage.types';
 import { StorageDriver } from '../types/storage-driver.interface';
 import { Readable } from 'stream';
 import { StorageDriverFactory } from '../storage-driver.factory';
+import { ContentTypes, UploadCallback, UploadInstruction } from '@athena/types';
+import { StorageException, StorageExceptionCode } from '../types/storage.exception';
+
 
 @Injectable()
 export class StorageService implements StorageDriver {
@@ -101,22 +103,25 @@ export class StorageService implements StorageDriver {
     return driver.checkFileExists(params);
   }
 
-  async getUrl(
-    options: GetUrlOptions & { key: string },
-  ): Promise<string> {
-    const { key, signed, expiresInSeconds } = options;
-
-    if (signed && this.driver.getSignedUrl) {
-      const { folder, name } = this.splitKey(key);
-      return this.driver.getSignedUrl({
-        folderPath: folder,
-        filename: name,
-        expiresInSeconds,
-      });
-    }
-
-    return this.buildPublicUrl(key);
+  getUploadUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    if (!this.driver.getUploadUrl)
+      throw new StorageException("Upload Signed URL not yet implemented", StorageExceptionCode.INVALID_CONFIGURATION)
+    return this.driver.getUploadUrl(params)
   }
+  getUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    if (this.driver.getUrl)
+      return this.driver.getUrl(params)
+
+
+    return this.buildPublicUrl(params.key)
+
+  }
+
+  getUploadInstruction(url?: string, callback?: UploadCallback): UploadInstruction {
+
+    return this.driver.getUploadInstruction(url, callback)
+  }
+
 
   private buildPublicUrl(key: string): string {
     const publicBaseUrl: string = this.options?.options?.publicBaseUrl;

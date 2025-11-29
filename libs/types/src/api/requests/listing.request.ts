@@ -27,7 +27,6 @@ export interface PublishListingRequest {
 
 export interface UploadFileDraftListingRequest {
   contentType: ContentTypes,
-  size: number,
   /**
    * Optional.
    * Use case: Direct upload file button as new draft or upload to a existing draft

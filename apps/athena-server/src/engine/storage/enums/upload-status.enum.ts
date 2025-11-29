@@ -1,0 +1,7 @@
+export enum UploadStatus {
+  PENDING = "PENDING",
+  UPLOADING = "UPLOADING",
+  PROCESSING = "PROCESSING",
+  READY = "READY",
+  FAILED = "FAILED"
+}

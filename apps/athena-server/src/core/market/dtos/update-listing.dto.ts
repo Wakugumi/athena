@@ -20,7 +20,6 @@ export class UpdateDraftListingDto implements UpdateListingRequest {
   @IsOptional()
   currency?: Currency | null;
 
-
   @ApiProperty({ nullable: true, type: "number", required: false })
   @IsNumber()
   @IsOptional()
@@ -35,11 +34,6 @@ export class UpdateDraftListingDto implements UpdateListingRequest {
   @IsString()
   @IsOptional()
   description?: string | null;
-
-  @ApiProperty({ nullable: true, type: "string", required: false })
-  @IsEnum(Visibility)
-  @IsOptional()
-  visibility?: Visibility | null;
 
   @ApiProperty({ nullable: true, type: "string", required: false })
   @IsString()

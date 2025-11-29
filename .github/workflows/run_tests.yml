@@ -1,0 +1,30 @@
+name: Run Specs
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        apps: [apps/athena-server]
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: pnpm install
+
+      - run: pnpm test
+        working-directory: ${{ matrix.apps }}
+    

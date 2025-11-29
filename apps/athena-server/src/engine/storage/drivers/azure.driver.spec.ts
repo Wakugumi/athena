@@ -68,7 +68,7 @@ describe.only('AzureDriver', () => {
     mockContainerClient.getBlockBlobClient.mockReturnValue(mockBlockBlobClient);
     mockContainerClient.getBlobClient.mockReturnValue(mockBlobClient);
 
-    driver = new AzureDriver(options);
+    driver = new AzureDriver("api", options);
   });
 
   describe('constructor', () => {
@@ -408,9 +408,9 @@ describe.only('AzureDriver', () => {
   describe('getSignedUrl', () => {
     it('should generate signed URL successfully', async () => {
       const params = {
-        folderPath: 'folder',
-        filename: 'file.txt',
+        key: 'key',
         expiresInSeconds: 3600,
+
       };
 
       // Mock the generateBlobSASQueryParameters function
@@ -419,7 +419,7 @@ describe.only('AzureDriver', () => {
         toString: () => 'sastoken=abc123',
       });
 
-      const result = await driver.getSignedUrl(params);
+      const result = driver.getSignedUrl(params);
 
       expect(result).toBe(
         'https://test.blob.core.windows.net/container/path/file.txt?sastoken=abc123',
@@ -428,8 +428,7 @@ describe.only('AzureDriver', () => {
 
     it('should handle SAS generation errors', async () => {
       const params = {
-        folderPath: 'folder',
-        filename: 'file.txt',
+        key: 'key'
       };
 
       const { generateBlobSASQueryParameters } = require('@azure/storage-blob');
@@ -437,18 +436,18 @@ describe.only('AzureDriver', () => {
         throw new Error('SAS generation failed');
       });
 
-      await expect(driver.getSignedUrl(params)).rejects.toThrow(
-        StorageException,
-      );
-      await expect(driver.getSignedUrl(params)).rejects.toThrow(
-        'Failed to generate signed URL',
-      );
+      try {
+        driver.getSignedUrl(params)
+      } catch (error) {
+
+        expect(error).toBeInstanceOf(StorageException);
+        expect((error as StorageException).code).toBe(StorageExceptionCode.FAILED_GENERATE_SAS)
+      }
     });
 
     it('should use default expiration when not provided', async () => {
       const params = {
-        folderPath: 'folder',
-        filename: 'file.txt',
+        key: 'key'
       };
 
       const { generateBlobSASQueryParameters } = require('@azure/storage-blob');
@@ -456,7 +455,7 @@ describe.only('AzureDriver', () => {
         toString: () => 'sastoken=abc123',
       });
 
-      await driver.getSignedUrl(params);
+      driver.getSignedUrl(params);
 
       expect(generateBlobSASQueryParameters).toHaveBeenCalledWith(
         expect.objectContaining({

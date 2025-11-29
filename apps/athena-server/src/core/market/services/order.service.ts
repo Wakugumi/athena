@@ -3,9 +3,9 @@ import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
 import { Order } from "../entities/order.entity";
 import { DataSource, Entity, Repository } from "typeorm";
 import { PurcaseInputDto } from "../dtos/purchase.input";
-import { Listing } from "../entities/listing.entity";
 import { EscrowService } from "./escrow.service";
 import { OrderStatus } from "@athena/types";
+import { Listing } from "src/core/listing/entities/listing.entity";
 
 @Injectable()
 export class OrderService {
@@ -25,7 +25,7 @@ export class OrderService {
         buyerId: dto.buyerId,
         listingId: dto.listingId,
         amount: listing.price,
-        sellerId: listing.sellerId,
+        sellerId: listing.ownerId,
         status: OrderStatus.PENDING
       });
 

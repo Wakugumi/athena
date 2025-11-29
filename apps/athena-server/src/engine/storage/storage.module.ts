@@ -2,14 +2,16 @@ import { DynamicModule, Global, Module } from '@nestjs/common';
 import { StorageService } from './services/storage.service';
 import { StorageTestController } from './controllers/test.controller';
 import { StorageDriverFactory } from './storage-driver.factory';
-import { STORAGE_OPTIONS, STORAGE_STRATEGY, STORAGE_WEBHOOK_ADAPTER_AZURE } from './types/storage.tokens';
+import { STORAGE_OPTIONS, STORAGE_STRATEGY, UPLOAD_CALLBACK_URL } from './types/storage.tokens';
 import { AthenaConfigModule } from '../athena-config/athena-config.module';
 import { AthenaConfigService } from '../athena-config/athena-config.service';
 import { StorageKeyService } from './services/storage-key.service';
-import { StorageWebhookController } from './controllers/storage-webhook.controller';
-import { AzureWebhookAdapter } from './webhook-adapters/azure-webhook.adapter';
 import { StorageProcessingService } from './services/storage-processing.service';
 import { NoteModule } from 'src/core/note/note.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UploadEntity } from './entities/upload.entity';
+import { UploadService } from './services/upload.service';
+import { UploadController } from './controllers/upload.controller';
 
 @Global()
 @Module({})
@@ -17,7 +19,7 @@ export class StorageModule {
   static forRoot(): DynamicModule {
     return {
       module: StorageModule,
-      imports: [AthenaConfigModule, NoteModule],
+      imports: [AthenaConfigModule, NoteModule, TypeOrmModule.forFeature([UploadEntity])],
       providers: [
         StorageKeyService,
         StorageDriverFactory,
@@ -41,12 +43,19 @@ export class StorageModule {
             config.get('STORAGE_TYPE'),
           inject: [AthenaConfigService],
         },
+        {
+          provide: UPLOAD_CALLBACK_URL,
+          useFactory: (config: AthenaConfigService) =>
+            config.get('API_URL')
+          ,
+          inject: [AthenaConfigService]
+        },
         StorageService,
         StorageProcessingService,
-        AzureWebhookAdapter
+        UploadService
       ],
-      controllers: [StorageTestController, StorageWebhookController],
-      exports: [StorageService, StorageKeyService, StorageProcessingService],
+      controllers: [StorageTestController, UploadController],
+      exports: [StorageService, StorageKeyService, StorageProcessingService, UploadService],
     };
   }
 }

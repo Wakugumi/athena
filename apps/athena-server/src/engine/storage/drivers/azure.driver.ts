@@ -5,7 +5,6 @@ import {
   BlobSASPermissions,
   StorageSharedKeyCredential,
 } from '@azure/storage-blob';
-import { DefaultAzureCredential } from '@azure/identity';
 import { StorageDriver } from '../types/storage-driver.interface';
 import {
   StorageException,
@@ -17,7 +16,9 @@ import { mkdir } from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import { AzureBlobOptions } from '../types/storage.types';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
+import { STORAGE_OPTIONS, UPLOAD_CALLBACK_URL } from '../types/storage.tokens';
+import { UploadCallback, UploadInstruction } from '@athena/types';
 
 export class AzureDriver implements StorageDriver {
   private client: BlobServiceClient;
@@ -26,7 +27,7 @@ export class AzureDriver implements StorageDriver {
   private options: AzureBlobOptions;
   private sharedKeyCredential: StorageSharedKeyCredential;
 
-  constructor(options: AzureBlobOptions) {
+  constructor(@Inject(UPLOAD_CALLBACK_URL) private readonly apiUrl: string, @Inject(STORAGE_OPTIONS) options: AzureBlobOptions) {
     if (!options.accountKey) {
       throw new StorageException(
         "Only support authenticate with account key, usually paired with account name",
@@ -192,13 +193,12 @@ export class AzureDriver implements StorageDriver {
     }
   }
 
-  async getSignedUrl(params: {
-    folderPath: string;
-    filename: string;
-    expiresInSeconds?: number;
-  }): Promise<string> {
-    const filePath = `${params.folderPath}/${params.filename}`;
-    const blobClient = this.container.getBlobClient(filePath);
+  getSignedUrl(params: {
+    key: string
+    expiresInSeconds?: number,
+    permissions?: string
+  }): string {
+    const blobClient = this.container.getBlobClient(params.key);
 
     if (!this.sharedKeyCredential) {
       throw new StorageException(
@@ -215,8 +215,8 @@ export class AzureDriver implements StorageDriver {
 
       const sasOptions = {
         containerName: this.options.container,
-        blobName: filePath,
-        permissions: BlobSASPermissions.parse('w'), // read permission
+        blobName: params.key,
+        permissions: BlobSASPermissions.parse(params.permissions ?? 'cw'), // read permission
         startsOn: new Date(),
         expiresOn,
       };
@@ -231,8 +231,34 @@ export class AzureDriver implements StorageDriver {
       this.logger.error('Error generating signed URL:', error);
       throw new StorageException(
         'Failed to generate signed URL',
-        StorageExceptionCode.FILE_NOT_FOUND,
+        StorageExceptionCode.FAILED_GENERATE_SAS,
       );
     }
+  }
+
+  getUploadUrl(params: { key: string; }): string {
+    return this.getSignedUrl({ key: params.key, permissions: 'cw' });
+
+  }
+
+  getUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    return this.getSignedUrl({
+      key: params.key, expiresInSeconds: params.expiresInSeconds, permissions: "r"
+
+    })
+  }
+
+  getUploadInstruction(url?: string, callback?: UploadCallback): UploadInstruction {
+
+    return {
+      method: "PUT",
+      headers: {
+        "x-ms-blob-type": "BlockBlob"
+      },
+      url: url,
+      callback: callback
+
+    }
+
   }
 }

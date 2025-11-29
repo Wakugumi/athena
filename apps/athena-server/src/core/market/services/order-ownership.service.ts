@@ -2,8 +2,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Order } from "../entities/order.entity";
 import { OrderException, OrderExceptionCode } from "../exceptions/order.exception";
-import { Listing } from "../entities/listing.entity";
 import { HttpStatus } from "@nestjs/common";
+import { Listing } from "src/core/listing/entities/listing.entity";
 
 export class OrderOwnersipService {
   constructor(
@@ -25,12 +25,7 @@ export class OrderOwnersipService {
     const listing = await this.listingRepo.findOneBy({ id: order.listingId })
     if (!listing) throw new OrderException('Listing not exist', OrderExceptionCode.LISTING_NOT_FOUND);
 
-    if (listing.sellerId !== sellerId) throw new OrderException('Seller is not matched to this order', OrderExceptionCode.LISTING_OWNER_MISMATCH, "User is not authorized to run process this order", HttpStatus.UNAUTHORIZED);
-
-  }
-
-
-  async ensureBuyerOwn(orderId: string, buyerId: string) {
+    if (listing.ownerId !== sellerId) throw new OrderException('Seller is not matched to this order', OrderExceptionCode.LISTING_OWNER_MISMATCH, "User is not authorized to run process this order", HttpStatus.UNAUTHORIZED);
 
   }
 }

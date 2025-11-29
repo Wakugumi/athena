@@ -157,7 +157,7 @@ export class StorageTestController {
   async getUrl(@Query('key') key: string, @Query('signed') signed?: string, @Query('expiresIn') expiresIn?: string) {
     if (!key) throw new HttpException('key query param required', HttpStatus.BAD_REQUEST);
     try {
-      const url = await this.storageService.getUrl({ key, signed: signed === 'true', expiresInSeconds: expiresIn ? Number(expiresIn) : undefined });
+      const url = this.storageService.getUrl({ key: key });
       return { url };
     } catch (err) {
       throw new HttpException((err as any)?.message || String(err), HttpStatus.INTERNAL_SERVER_ERROR);

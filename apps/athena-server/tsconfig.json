@@ -25,6 +25,9 @@
   "references": [
     {
       "path": "../../libs/types"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ]
 }

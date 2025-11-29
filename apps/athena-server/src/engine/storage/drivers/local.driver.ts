@@ -7,6 +7,7 @@ import {
 } from '../types/storage.exception';
 import { createReadStream, existsSync } from 'fs';
 import { Readable } from 'stream';
+import { UploadCallback, UploadInstruction } from '@athena/types';
 
 export interface LocalDriverOptions {
   storagePath: string;
@@ -179,8 +180,7 @@ export class LocalDriver implements StorageDriver {
   }
 
   async getSignedUrl(params: {
-    folderPath: string;
-    filename: string;
+    key: string,
     expiresInSeconds?: number;
   }): Promise<string> {
     // For local storage, we just return the public URL
@@ -188,8 +188,7 @@ export class LocalDriver implements StorageDriver {
     // or use a different approach for local file access control
     const filePath = join(
       this.options.storagePath,
-      params.folderPath,
-      params.filename,
+      params.key
     );
 
     // If publicBaseUrl is configured, use it
@@ -202,4 +201,16 @@ export class LocalDriver implements StorageDriver {
     // Note: This is not a real "signed URL" but works for local development
     return filePath;
   }
+  getUploadUrl(params: { key: string; expiresInSeconds?: number; }): string {
+
+    return ""
+  }
+  getUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    return "";
+  }
+  getUploadInstruction(url?: string, callback?: UploadCallback): UploadInstruction {
+
+    return {} as any
+  }
+
 }

@@ -6,42 +6,50 @@ export class MarkdownService {
   generateTextPreview(markdown: string, maxChars = 500): string {
     if (!markdown) return '';
 
-    // Limit to maxChars but avoid cutting inside code blocks, links, or images
     let sliceIndex = maxChars;
 
-    // Prevent cutting inside inline code `code`
-    const lastBacktick = markdown.lastIndexOf('`', sliceIndex);
-    if (lastBacktick !== -1 && markdown.indexOf('`', lastBacktick + 1) > sliceIndex) {
-      sliceIndex = lastBacktick; // cut before inline code
+    // ---- Avoid cutting inside image syntax ![alt](url) ----
+    {
+      const open = markdown.lastIndexOf('![', sliceIndex);
+      if (open !== -1) {
+        const close = markdown.indexOf(')', open);
+        if (close !== -1 && close > sliceIndex) {
+          sliceIndex = open; // cut before whole ![...](...)
+        }
+      }
     }
 
-    // Prevent cutting inside links [text](url)
-    const lastOpenBracket = markdown.lastIndexOf('[', sliceIndex);
-    const lastCloseBracket = markdown.lastIndexOf(']', sliceIndex);
-    const lastParen = markdown.lastIndexOf('(', sliceIndex);
-    const lastCloseParen = markdown.lastIndexOf(')', sliceIndex);
-    if (
-      lastOpenBracket > lastCloseBracket &&
-      lastParen > lastCloseParen &&
-      lastParen < sliceIndex
-    ) {
-      sliceIndex = lastOpenBracket; // cut before link
+    // ---- Avoid cutting inline code `code` ----
+    {
+      const open = markdown.lastIndexOf('`', sliceIndex);
+      if (open !== -1) {
+        const close = markdown.indexOf('`', open + 1);
+        if (close !== -1 && close > sliceIndex) {
+          sliceIndex = open;
+        }
+      }
     }
 
-    // Prevent cutting inside images ![alt](url)
-    const lastImage = markdown.lastIndexOf('![', sliceIndex);
-    const lastImageClose = markdown.lastIndexOf(')', sliceIndex);
-    if (lastImage > lastImageClose && lastImage < sliceIndex) {
-      sliceIndex = lastImage; // cut before image
+    // ---- Avoid cutting links [text](url) ----
+    {
+      const open = markdown.lastIndexOf('[', sliceIndex);
+      if (open !== -1) {
+        const mid = markdown.indexOf(']', open + 1);
+        const close = markdown.indexOf(')', mid + 1);
+        if (
+          mid !== -1 &&
+          close !== -1 &&
+          mid > open &&
+          close > sliceIndex
+        ) {
+          sliceIndex = open; // cut before entire link
+        }
+      }
     }
 
-    // Take slice
     let preview = markdown.slice(0, sliceIndex);
 
-    // Optional: add ellipsis if truncated
-    if (sliceIndex < markdown.length) {
-      preview += '\n\n...';
-    }
+    if (sliceIndex < markdown.length) preview += '\n\n...';
 
     return preview;
   }
