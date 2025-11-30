@@ -12,7 +12,8 @@ export class FetchListingsHandler implements IQueryHandler<FetchListingsQuery> {
 
   async execute(query: FetchListingsQuery): Promise<Listing[]> {
     const qb = this.repo.createQueryBuilder('l');
-    qb.leftJoinAndSelect('l.items', 'item')
+    qb.leftJoinAndSelect('l.items', 'item');
+    qb.leftJoin('l.owner', 'owner').addSelect(['owner.id', 'owner.displayName', 'owner.avatar', 'owner.bio'])
     if (query.userId)
       qb.andWhere('l.ownerId = :userId', { userId: query.userId });
 

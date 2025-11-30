@@ -17,6 +17,7 @@ import { AthenaConfigService } from "src/engine/athena-config/athena-config.serv
             username: config.get("DATABASE_USER"),
             password: config.get("DATABASE_PASSWORD"),
             database: config.get('DATABASE_NAME'),
+            schema: 'public',
             //entities: [ process.env.NODE_ENV === NodeEnvironment.PRODUCTION ? 'dist/**/*.entity{.ts,.js}' : 'src/**/*.entity{.ts,.js}',],
             autoLoadEntities: true,
             synchronize: true,
