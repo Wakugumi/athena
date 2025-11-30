@@ -5,7 +5,7 @@ import { Order } from './order.entity';
 @Entity('escrow')
 @Index('UQ_ESCROW_ORDER_ID', ['orderId'], { unique: true })
 export class Escrow implements IEscrow {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
 

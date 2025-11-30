@@ -6,7 +6,7 @@ import { Note } from "./note.entity";
 export class NoteAttachment implements INoteAttachment {
 
 
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
 

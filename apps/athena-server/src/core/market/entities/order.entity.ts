@@ -7,7 +7,7 @@ import { Listing } from 'src/core/listing/entities/listing.entity';
 @Entity('order')
 @Index('UQ_ORDER_ESCROW_ID', ['escrowId'], { unique: true })
 export class Order implements OrderType {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()

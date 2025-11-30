@@ -7,7 +7,7 @@ import { Order } from "src/core/market/entities/order.entity";
 
 @Entity('listing')
 export class Listing implements IListing {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
 
