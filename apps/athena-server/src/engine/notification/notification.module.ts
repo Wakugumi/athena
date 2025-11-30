@@ -9,13 +9,25 @@ import { NotificationService } from './notification.service';
 import { NotificationConsumer } from './consumers/notification.consumer';
 import { NotificationController } from './notification.controller';
 import { NOTIFICATION_QUEUE } from './types/notification.constants';
+import { AthenaConfigModule } from '../athena-config/athena-config.module';
+import { AthenaConfigService } from '../athena-config/athena-config.service';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     TypeOrmModule.forFeature([Notification]),
-    BullModule.forRoot({
-      connection: { host: 'localhost', port: 6379 },
+    BullModule.forRootAsync({
+      imports: [AthenaConfigModule],
+      inject: [AthenaConfigService],
+      useFactory: (config: AthenaConfigService) => {
+        return {
+          connection: {
+            host: config.get("REDIS_HOST"),
+            port: config.get("REDIS_PORT")
+          },
+        }
+      }
+
     }),
     BullModule.registerQueue({
       name: NOTIFICATION_QUEUE,
