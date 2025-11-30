@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Re
 
 @Entity('token_ledger')
 export class TokenLedger implements ITokenLedger {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'numeric', precision: 18, scale: 2 })

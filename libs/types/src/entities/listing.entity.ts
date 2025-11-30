@@ -12,6 +12,7 @@ import { Visibility } from "../enums/visibility.enum";
 import { ID } from "../common/datatype.common";
 import { ListingStatus } from "../enums/listing-status.enum";
 import { ContentTypes } from "../enums";
+import { PublicUser } from "./user.entity";
 
 export interface ListingItem {
   id: string;
@@ -33,6 +34,7 @@ export interface Listing {
   /** Items in this listing */
   items: ListingItem[]
   ownerId: ID;
+  owner?: PublicUser | null;
   title: string;
   description?: string | null;
   /**

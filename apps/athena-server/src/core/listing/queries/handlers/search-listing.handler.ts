@@ -39,8 +39,7 @@ export class SearchListingHandler implements IQueryHandler<SearchListingQuery> {
 
     }
 
-
-    q.leftJoinAndSelect('x.owner', 'owner');
+    q.leftJoin('x.owner', 'owner').addSelect(['owner.id', 'owner.displayName', 'owner.avatar', 'owner.bio'])
 
 
     return await q.getMany()

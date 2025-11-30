@@ -1,4 +1,4 @@
-import { Currency, Listing as IListing, License, ListingStatus, Visibility } from "@athena/types"
+import { Currency, Listing as IListing, License, ListingStatus, PublicUser, Visibility } from "@athena/types"
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm"
 import { ListingItem } from "./listing-item.entity";
 import { User } from "src/core/user/user.entity";
@@ -7,7 +7,7 @@ import { Order } from "src/core/market/entities/order.entity";
 
 @Entity('listing')
 export class Listing implements IListing {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
 
@@ -15,7 +15,7 @@ export class Listing implements IListing {
   ownerId: string;
 
   @ManyToOne(() => User, (user) => user.listings)
-  @JoinColumn({ name: 'sellerId' })
+  @JoinColumn({ name: 'ownerId' })
   owner: Relation<User>;
 
   @Column()

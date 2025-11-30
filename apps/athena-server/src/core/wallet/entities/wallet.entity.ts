@@ -6,7 +6,7 @@ import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, 
 @Entity('wallet')
 
 export class Wallet implements TokenBalance {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'enum', enum: WalletOwnerType, enumName: "wallet_owner_type" })

@@ -11,7 +11,7 @@ import { Notification } from "src/engine/notification/notification.entity";
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
 @Index('UQ_USER_EMAIL', ['email'], { unique: true })
 export class User implements SharedUser {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'varchar' })

@@ -4,7 +4,7 @@ import { NoteAttachment } from "./note-attachment.entity";
 
 @Entity('note')
 export class Note implements NoteType {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
