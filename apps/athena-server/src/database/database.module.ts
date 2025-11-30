@@ -11,9 +11,7 @@ import { AthenaConfigService } from "src/engine/athena-config/athena-config.serv
         inject: [AthenaConfigService],
         useFactory: (config: AthenaConfigService) => {
           return {
-
             type: 'postgres',
-
             host: config.get('DATABASE_HOST'),
             port: +config.get("DATABASE_PORT"),
             username: config.get("DATABASE_USER"),
@@ -32,11 +30,8 @@ import { AthenaConfigService } from "src/engine/athena-config/athena-config.serv
 
           }
         },
-
       }
     ),
-
-
   ],
   exports: [DatabaseModule]
 

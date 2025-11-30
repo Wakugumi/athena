@@ -35,6 +35,19 @@ export class ConfigVariables {
   })
   API_URL: string = 'http://localhost:3000/api';
 
+  // REDIS CONFIG
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ServerConfig,
+    description: 'hostname of Redis instance',
+    type: ConfigVariableType.STRING
+  })
+  REDIS_HOST: string = 'localhost'
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ServerConfig,
+    description: 'port of Redis instance',
+    type: ConfigVariableType.STRING
+  })
+  REDIS_PORT: number = 6379
 
 
   // DATABASE CONFIG
