@@ -4,7 +4,7 @@ import { User } from "../user.entity";
 import { Repository } from "typeorm";
 import { UpdateProfileDTO } from "../dtos/update-profile.dto";
 import { UserException, UserExceptionCode } from "../user.exception";
-import { UserWithoutPassword } from "@athena/types";
+import { ListingStatus, PublicUser, UserWithoutPassword } from "@athena/types";
 
 @Injectable()
 export class UserProfileService {
@@ -41,7 +41,10 @@ export class UserProfileService {
     const { passwordHash, ...user } = await this.userRepo.findOneByOrFail({ id: userId })
 
     return user as UserWithoutPassword
-
-
+  }
+  async getPublicUser(userId: string): Promise<PublicUser | null> {
+    return this.userRepo.createQueryBuilder('x').andWhere("x.id = :id", { id: userId }).addSelect(
+      ['x.displayName', 'x.avatar', 'x.bio', 'x.createdAt', 'x.username'])
+      .leftJoinAndSelect('x.listings', 'l', 'l.status = :status', { status: ListingStatus.PUBLISHED }).getOne();
   }
 }

@@ -47,7 +47,6 @@ export class SignupService {
         firstName: payload.firstName,
         lastName: payload.lastName,
         avatar: this.profileService.generateDefaultAvatar(payload.firstName, payload.lastName),
-        bio: payload.bio,
         displayName: payload.displayName ?? payload.username,
         passwordHash: await hashPassword(payload.password)
       });
