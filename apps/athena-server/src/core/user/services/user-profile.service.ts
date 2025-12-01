@@ -42,8 +42,8 @@ export class UserProfileService {
 
     return user as UserWithoutPassword
   }
-  async getPublicUser(userId: string): Promise<PublicUser | null> {
-    return this.userRepo.createQueryBuilder('x').andWhere("x.id = :id", { id: userId }).addSelect(
+  async getPublicUser(username: string): Promise<PublicUser | null> {
+    return this.userRepo.createQueryBuilder('x').andWhere("x.username = :username", { username: username }).select(
       ['x.displayName', 'x.avatar', 'x.bio', 'x.createdAt', 'x.username'])
       .leftJoinAndSelect('x.listings', 'l', 'l.status = :status', { status: ListingStatus.PUBLISHED }).getOne();
   }
