@@ -1,5 +1,5 @@
 import { PublicUser, User, } from "@athena/types";
-import { Body, Controller, Get, Param, Patch, Put, Request, Scope, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Put, Query, Request, Scope, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UserProfileService } from "./services/user-profile.service";
 import { Request as ReqContext } from "express";
 import { UpdateProfileDTO } from "./dtos/update-profile.dto";
@@ -14,10 +14,10 @@ export class UserController {
 
   constructor(private profileService: UserProfileService) { }
 
-  @Get('profile/:id')
+  @Get('profile/:username')
   @Public()
-  async getProfile(@Param('id') userId: string) {
-    return await this.profileService.getPublicUser(userId)
+  async getProfile(@Param('username') username: string): Promise<PublicUser | null> {
+    return await this.profileService.getPublicUser(username)
 
   }
 
