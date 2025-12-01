@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
@@ -89,7 +89,7 @@ export class ListingController {
   }
 
 
-  @Put('draft')
+  @Patch('draft')
   @ApiBearerAuth()
   @ApiOperation({ summary: "Update draft", description: "Update listing draft" })
   async updateDraft(@CurrentUser() user: User, @Body() payload: UpdateDraftListingDto): Promise<Partial<Listing>> {
