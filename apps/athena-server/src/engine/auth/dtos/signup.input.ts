@@ -33,10 +33,6 @@ export class SignupPayload implements SignupRequest {
   email: string;
 
   @ApiProperty()
-  bio: string;
-
-
-  @ApiProperty()
   @Matches(PASSWORD_REGEX, {
     message: "Password must contains letters, numbers and at least one symbol"
   })

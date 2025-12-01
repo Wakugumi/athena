@@ -13,6 +13,7 @@
 
 
 import { ID } from "../common";
+import { Listing } from "./listing.entity";
 
 export interface User {
 
@@ -37,9 +38,15 @@ export interface User {
   *  this value will mostly be used directly in <img> tag
     */
   avatar: string;
-  bio?: string | null
+  bio?: string | null;
+
+  /**
+  * publicly available only listings.
+  * hydrated on several queries.
+  */
+  listings?: Listing[] | null;
 }
 
-export type PublicUser = Pick<User, "id" | "displayName" | "avatar" | "bio">
+export type PublicUser = Pick<User, "id" | "displayName" | "avatar" | "bio" | "createdAt" | "username" | "listings">
 
 export type UserWithoutPassword = Omit<User, "passwordHash">
