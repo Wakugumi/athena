@@ -42,7 +42,7 @@ export default function UserListings() {
   const [page, setPage] = useState(1)
 
   const debounceQuery = useDebounce(query, 300);
-  const listingsQuery = useQueryListings({ page, limit: 6, sortBy: sort as keyof Listing, order: order!, title: debounceQuery })
+  const listingsQuery = useQueryListings({ page, limit: 6, sortBy: sort as keyof Listing, order: order!, title: debounceQuery, seller: username as string })
   const listings = listingsQuery.data;
 
   const setSort = (value: sortOptions) => {

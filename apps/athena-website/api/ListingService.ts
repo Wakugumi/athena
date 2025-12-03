@@ -3,7 +3,7 @@ import api from "./api";
 import { response } from "express";
 
 export default class ListingService {
-  static async getListings(paginate: PaginationQuery, title?: string): Promise<Paginated<Listing> | undefined> {
+  static async getListings(paginate: PaginationQuery, title?: string, seller?: string): Promise<Paginated<Listing> | undefined> {
     const params = new URLSearchParams()
     if (paginate.page)
       params.append("page", paginate.page.toString());
@@ -17,6 +17,9 @@ export default class ListingService {
     if (title) {
       params.append('title', title);
     }
+
+    if (seller)
+      params.append('seller', seller)
     return await api.get<FindListingsResponse>('/listing?' + params.toString())
       .then((response) => {
 
