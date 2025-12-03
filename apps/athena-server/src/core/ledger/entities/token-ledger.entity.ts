@@ -1,11 +1,12 @@
 import { TokenLedgerReferenceType, TokenLedgerType, TokenLedger as ITokenLedger, TokenLedgerStatus } from '@athena/types'
+import { randomUUID } from 'crypto';
 import { Wallet } from 'src/core/wallet/entities/wallet.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation } from 'typeorm';
 
 @Entity('token_ledger')
 export class TokenLedger implements ITokenLedger {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column({ type: 'numeric', precision: 18, scale: 2 })
   amount: number;

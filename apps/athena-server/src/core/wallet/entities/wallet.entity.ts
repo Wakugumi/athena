@@ -1,13 +1,14 @@
 import { Wallet as TokenBalance, WalletOwnerType } from "@athena/types";
+import { randomUUID } from "crypto";
 import { TokenLedger } from "src/core/ledger/entities/token-ledger.entity";
 import { User } from "src/core/user/user.entity";
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
 
 @Entity('wallet')
 
 export class Wallet implements TokenBalance {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column({ type: 'enum', enum: WalletOwnerType, enumName: "wallet_owner_type" })
   ownerType: WalletOwnerType;

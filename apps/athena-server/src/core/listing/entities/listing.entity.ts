@@ -1,14 +1,15 @@
 import { Currency, Listing as IListing, License, ListingStatus, PublicUser, Visibility } from "@athena/types"
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm"
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm"
 import { ListingItem } from "./listing-item.entity";
 import { User } from "src/core/user/user.entity";
 import { Order } from "src/core/market/entities/order.entity";
+import { randomUUID } from "crypto";
 
 
 @Entity('listing')
 export class Listing implements IListing {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
 
   @Column()

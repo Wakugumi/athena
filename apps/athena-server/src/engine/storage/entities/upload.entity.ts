@@ -1,13 +1,14 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UploadStatus } from "../enums/upload-status.enum";
 import { ContentTypes } from "@athena/types";
 import { UploadPurpose } from "../enums/upload-purpose.enum";
 import { UploadDomain } from "../enums/upload-domain.enum";
+import { randomUUID } from "crypto";
 
 @Entity('upload')
 export class UploadEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column({ type: 'varchar' })
   key: string;

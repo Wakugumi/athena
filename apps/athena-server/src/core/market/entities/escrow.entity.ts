@@ -1,12 +1,13 @@
 import { EscrowStatus, Escrow as IEscrow } from '@athena/types'
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from 'typeorm';
 import { Order } from './order.entity';
+import { randomUUID } from 'crypto';
 
 @Entity('escrow')
 @Index('UQ_ESCROW_ORDER_ID', ['orderId'], { unique: true })
 export class Escrow implements IEscrow {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
 
   @Column()

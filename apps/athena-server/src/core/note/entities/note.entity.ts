@@ -1,11 +1,12 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
 import { AIMetadata, Collaborator, Note as NoteType } from '@athena/types'
 import { NoteAttachment } from "./note-attachment.entity";
+import { randomUUID } from "crypto";
 
 @Entity('note')
 export class Note implements NoteType {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column()
   title: string;

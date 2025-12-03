@@ -1,11 +1,12 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { Listing } from "./listing.entity";
 import { ContentTypes, ListingItem as IListing } from '@athena/types'
+import { randomUUID } from "crypto";
 
 @Entity('listing_item')
 export class ListingItem implements IListing {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column({ type: 'varchar' })
   listingId: string;

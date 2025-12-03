@@ -1,12 +1,13 @@
 
 import { NotificationCategory, Notification as INotification } from '@athena/types';
+import { randomUUID } from 'crypto';
 import { User } from 'src/core/user/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Relation, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Relation, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Notification implements INotification {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column()
   userId: string;

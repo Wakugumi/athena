@@ -1,13 +1,13 @@
 import { ContentTypes, NoteAttachment as INoteAttachment } from "@athena/types";
-import { Column, CreateDateColumn, Entity, ForeignKey, Index, OneToOne, PrimaryGeneratedColumn, Relation } from "typeorm";
+import { Column, CreateDateColumn, Entity, ForeignKey, Index, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { Note } from "./note.entity";
+import { randomUUID } from "crypto";
 @Entity('attachment')
 @Index('UQ_ATTACHMENT_KEY', ['key'], { unique: true })
 export class NoteAttachment implements INoteAttachment {
 
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
 
   @Column({ type: 'enum', enum: ContentTypes, enumName: "content_types" })

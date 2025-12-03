@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index, OneToOne, Relation, OneToMany } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index, OneToOne, Relation, OneToMany, PrimaryColumn } from "typeorm";
 import { User as SharedUser } from "@athena/types"
 import { IsEmail, Matches } from "class-validator";
 import { USERNAME_REGEX } from "src/engine/auth/utils/auth.util";
@@ -6,13 +6,14 @@ import { Wallet } from "../wallet/entities/wallet.entity";
 import { Order } from "../market/entities/order.entity";
 import { Listing } from "../listing/entities/listing.entity";
 import { Notification } from "src/engine/notification/notification.entity";
+import { randomUUID } from "crypto";
 
 @Entity('user')
 @Index('UQ_USER_USERNAME', ['username'], { unique: true })
 @Index('UQ_USER_EMAIL', ['email'], { unique: true })
 export class User implements SharedUser {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryColumn('uuid')
+  id: string = randomUUID()
 
   @Column({ type: 'varchar' })
   displayName: string;
