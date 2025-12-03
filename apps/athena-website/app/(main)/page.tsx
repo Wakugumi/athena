@@ -2,8 +2,18 @@
 
 import { Button } from "flowbite-react";
 import Link from "next/link";
+import Logo from "../_components/Logo";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+  const { isAuth } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (isAuth())
+      router.push('/market')
+  }, [])
   return (
     <>
       <section className="bg-background" id="home">
@@ -109,6 +119,42 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      <footer className="bg-background border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="grid gap-10 md:grid-cols-4">
+            <div>
+              <div className="mb-3"><Logo variant="inline" /></div>
+              <p className="text-sm text-secondary max-w-xs">Share, Trade, and Access Quality Lecture Notes.</p>
+            </div>
+            <div>
+              <div className="font-medium text-foreground">Company</div>
+              <ul className="mt-3 space-y-2 text-sm text-secondary">
+                <li><a href="#about" className="hover:text-foreground">About Us</a></li>
+                <li><a href="#how" className="hover:text-foreground">How it works</a></li>
+                <li><a href="#community" className="hover:text-foreground">Community</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-medium text-foreground">Support</div>
+              <ul className="mt-3 space-y-2 text-sm text-secondary">
+                <li><a href="#help" className="hover:text-foreground">Help Center</a></li>
+                <li><a href="#contact" className="hover:text-foreground">Contact Us</a></li>
+                <li><a href="#feedback" className="hover:text-foreground">Submit Feedback</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-medium text-foreground">Learn</div>
+              <ul className="mt-3 space-y-2 text-sm text-secondary">
+                <li><a href="#newsroom" className="hover:text-foreground">Newsroom</a></li>
+                <li><a href="#events" className="hover:text-foreground">Events</a></li>
+                <li><a href="#donate" className="hover:text-foreground">Donate</a></li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </footer>
+
     </>
   );
 }

@@ -12,5 +12,5 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [flowbitePlugin],
+  plugins: [flowbitePlugin, require('@tailwindcss/typography')],
 } satisfies Config;

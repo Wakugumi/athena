@@ -1,32 +1,45 @@
-
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Notification } from '../notification.entity';
-import { NotificationService } from '../notification.service';
-import { NOTIFICATION_QUEUE, NotificationJob } from '../types/notification.constants';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { NotificationEventPayload } from '../types/notification.types';
+import { NotificationService } from '../notification.service';
+import { Logger } from '@nestjs/common';
+import { Notification } from '../notification.entity';
+import { NOTIFICATION_QUEUE } from '../types/notification.constants';
 
-@Processor(NOTIFICATION_QUEUE)
+@Processor(NOTIFICATION_QUEUE, {
+  concurrency: 10, // Process 10 jobs concurrently
+})
 export class NotificationConsumer extends WorkerHost {
-  constructor(
-    @InjectRepository(Notification)
-    private repo: Repository<Notification>,
-    private service: NotificationService
-  ) {
+  private readonly logger = new Logger(NotificationConsumer.name);
+
+  constructor(private readonly notificationsService: NotificationService) {
     super();
   }
-  async process(job: Job<NotificationEventPayload, any, NotificationJob>): Promise<Notification | void> {
-    if (job.name !== NotificationJob.CREATE) return;
 
-    const { userId, message } = job.data;
-    const saved = await this.repo.save(
-      this.repo.create({ userId, message }),
-    );
+  async process(job: Job<Notification>): Promise<void> {
+    this.logger.log(`Processing notification job ${job.id}: ${job.data.id}`);
 
-    this.service.pushToClient(userId, saved);
+    try {
+      this.notificationsService.sendNotification(job.data);
 
-    return saved;
+      // - Store in database
+      // - Send email/SMS
+      // - Push to mobile devices
+      // - Log analytics
+
+      this.logger.log(`Notification ${job.id} sent successfully`);
+    } catch (error) {
+      this.logger.error(`Failed to process notification ${job.id}:`, error);
+      throw error; // Will trigger retry
+    }
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    this.logger.debug(`Job ${job.id} completed`);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job, error: Error) {
+    this.logger.error(`Job ${job.id} failed:`, error.message);
   }
 }

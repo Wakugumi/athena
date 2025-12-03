@@ -1,7 +1,7 @@
 export enum NotificationCategory {
   ORDER = 'ORDER',
   PAYMENT = 'PAYMENT',
-  LITSING = 'LISTING',
+  LISTING = 'LISTING',
   SYSTEM = 'SYSTEM',
   USER = 'USER',
 }

@@ -23,11 +23,11 @@ export class ListingStorageSubscriber {
   constructor(
     @InjectRepository(Listing) private readonly listingRepo: Repository<Listing>,
     @InjectRepository(ListingItem) private readonly listingItemRepo: Repository<ListingItem>,
-    private readonly key: StorageKeyService,
+    private readonly keyService: StorageKeyService,
     private readonly eventEmitter: EventEmitter2,
     private readonly storageProcessing: StorageProcessingService,
     private readonly storage: StorageService,
-    private readonly uploadService: UploadService
+    private readonly uploadService: UploadService,
   ) { }
 
 
@@ -53,15 +53,15 @@ export class ListingStorageSubscriber {
     let preview = '**Preview**'
 
 
+
     // if the blob's key extension represent media file
     if (key.match(/\.(png|jpg|jpeg|gif)$/)) {
 
       key = await this.storageProcessing.convertImageToMarkdown(key)
 
-      preview = `![${key}](${this.storage.getUrl({ key: key })})`;
     }
-
     preview = await this.storageProcessing.generatePreview(key)
+
 
 
     this.logger.log(`saving listing item record ${upload.id} ${upload.key}`)
@@ -69,7 +69,7 @@ export class ListingStorageSubscriber {
     const newItem = await this.listingItemRepo.save({
       id: upload.id,
       listingId: upload.referenceId,
-      title: upload.key,
+      title: this.keyService.splitKey(key).filename ?? upload.id,
       status: "READY",
       preview: preview,
       blobKey: key,

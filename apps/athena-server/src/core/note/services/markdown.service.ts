@@ -8,6 +8,24 @@ export class MarkdownService {
 
     let sliceIndex = maxChars;
 
+    // ---- Avoid cutting base64 images ![alt](data:image/...) ----
+    {
+      const open = markdown.lastIndexOf('![', sliceIndex);
+      if (open !== -1) {
+        const urlStart = markdown.indexOf('(', open);
+        const urlEnd = markdown.indexOf(')', urlStart);
+        const isBase64 =
+          urlStart !== -1 &&
+          urlStart < sliceIndex &&
+          markdown.slice(urlStart + 1, urlStart + 13) === 'data:image/';
+
+        // if slice falls inside the base64 block, move sliceIndex to open
+        if (isBase64 && (urlEnd === -1 || urlEnd > sliceIndex)) {
+          sliceIndex = open;
+        }
+      }
+    }
+
     // ---- Avoid cutting inside image syntax ![alt](url) ----
     {
       const open = markdown.lastIndexOf('![', sliceIndex);

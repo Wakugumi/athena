@@ -29,6 +29,7 @@ export class ListingService {
     private readonly storageService: StorageService) { }
 
 
+
   async ensureUserOwnsListing(userId: string, listingId: string) {
     const found = await this.listingRepo.findOneBy({ id: listingId })
     if (found?.ownerId != userId)
@@ -49,11 +50,27 @@ export class ListingService {
 
 
   async draftListing(payload: DeepPartial<Listing>): Promise<Listing> {
-    return this.listingRepo.save({
-      ...payload,
-      visibility: Visibility.DRAFT,
-      status: ListingStatus.DRAFT,
+    return await this.listingRepo.manager.transaction(async (x) => {
+      const max = await x
+        .createQueryBuilder(Listing, 'i')
+        .setLock('pessimistic_write')
+        .where('i.ownerId = :ownerId', { ownerId: payload.ownerId })
+        .orderBy('i.number', 'DESC')
+        .limit(1)
+        .getOne();
+      const next = (max?.number ?? 0) + 1;
+      const newListing = await x.save(Listing, {
+        ...payload,
+        title: `New Draft ${next}`,
+        visibility: Visibility.DRAFT,
+        status: ListingStatus.DRAFT,
+        number: next
+      })
+
+      this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(payload.ownerId!, NotificationCategory.LISTING, `New draft [${newListing.title}] created`))
+      return newListing
     });
+
   }
 
   async updateDraft(listingId: string, payload: DeepPartial<Omit<Listing, "id">>): Promise<Partial<Listing>> {
@@ -88,7 +105,7 @@ export class ListingService {
     const saved = await this.listingRepo.save(listing);
 
     this.eventEmitter.emit(ListingEvents.PUBLISHED, new ListingPublishedEvent(listingId));
-    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(listing.ownerId, NotificationCategory.LITSING, `[${listing.title}] is now public`));
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(listing.ownerId, NotificationCategory.LISTING, `[${listing.title}] is now public`));
     return saved;
   }
 
@@ -155,7 +172,7 @@ export class ListingService {
     await this.listingRepo.update({ id: listingId }, listing);
 
 
-    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LITSING, `Your listing [${listing.title}] has been unlisted`))
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LISTING, `Your listing [${listing.title}] has been unlisted`))
 
     return listing;
 
@@ -171,7 +188,7 @@ export class ListingService {
 
     this.eventEmitter.emit(ListingEvents.REMOVED, new ListingDeleteEvent(listingId))
 
-    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LITSING, `Your draft [${listing?.title}] has been deleted`))
+    this.eventEmitter.emit(NotificationEvent.FIRE, new NotificationEventPayload(userId, NotificationCategory.LISTING, `Your draft [${listing?.title}] has been deleted`))
 
   }
 

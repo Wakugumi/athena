@@ -1,5 +1,6 @@
 import { PublicUser, UserWithoutPassword } from "../../entities";
 import { ApiResponse } from "../../utils/api-response";
+import { UploadInstruction } from "../upload";
 
 
 /**
@@ -26,3 +27,6 @@ export type FindUsersResponse = ApiResponse<PublicUser[]>
 
 
 export type MeResponse = ApiResponse<UserWithoutPassword>
+
+
+export type UpdateAvatarResponse = ApiResponse<UploadInstruction>;
