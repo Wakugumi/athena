@@ -27,9 +27,10 @@ jobs:
           IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/athena-website"
           SHA="${{ github.sha }}"
           API_URL="${{ secrets.API_URL }}"
+          STORAGE_URL="${{ secrets.STORAGE_URL }}"
           APP_NAME="Athena"
 
-          docker build --build-arg NEXT_PUBLIC_APP_NAME=$APP_NAME --build-arg NEXT_PUBLIC_API_URL=$API_URL -t $IMAGE:$SHA -f apps/athena-website/Dockerfile .
+          docker build --build-arg NEXT_PUBLIC_APP_NAME=$APP_NAME --build-arg NEXT_PUBLIC_STORAGE_URL=$STORAGE_URL --build-arg NEXT_PUBLIC_API_URL=$API_URL -t $IMAGE:$SHA -f apps/athena-website/Dockerfile .
           docker push $IMAGE:$SHA
 
           docker tag $IMAGE:$SHA $IMAGE:latest
