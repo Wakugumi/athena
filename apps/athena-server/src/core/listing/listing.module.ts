@@ -15,10 +15,12 @@ import { ListingStorageSubscriber } from "./events/subscribers/listing-storage.s
 import { ListingSubscriber } from "./events/subscribers/listing.subscriber";
 import { DeleteDraftListingHandler } from "./commands/handlers/delete-draft-listing.handler";
 import { TakedownListingHandler } from "./commands/handlers/takedown-listing.handler";
+import { FetchDraftHandler } from "./queries/handlers/fetch-draft.handler";
+import { FetchListingHandler } from "./queries/handlers/fetch-listing.handler";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Listing, ListingItem]), StorageModule],
-  providers: [ListingService, FetchListingsHandler, SearchListingHandler, PublishListingHandler, UpdateDraftListingHandler, DraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber, ListingSubscriber, DeleteDraftListingHandler, TakedownListingHandler],
+  providers: [ListingService, FetchListingsHandler, SearchListingHandler, PublishListingHandler, UpdateDraftListingHandler, DraftListingHandler, UploadFileListingHandler, ListingStorageSubscriber, ListingSubscriber, DeleteDraftListingHandler, TakedownListingHandler, FetchDraftHandler, FetchListingHandler],
   controllers: [ListingController],
   exports: [TypeOrmModule, ListingService]
 })

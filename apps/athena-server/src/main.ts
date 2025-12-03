@@ -16,7 +16,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor())
 
   app.enableCors({
-    origin: '*'
+    origin: ['http://localhost:3001'],
+    credentials: true
   });
 
   const swagger = new DocumentBuilder().setTitle("Athena API").setVersion("1.0").addBearerAuth({

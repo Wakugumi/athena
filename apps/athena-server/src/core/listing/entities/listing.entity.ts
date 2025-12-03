@@ -1,5 +1,5 @@
 import { Currency, Listing as IListing, License, ListingStatus, PublicUser, Visibility } from "@athena/types"
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm"
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm"
 import { ListingItem } from "./listing-item.entity";
 import { User } from "src/core/user/user.entity";
 import { Order } from "src/core/market/entities/order.entity";
@@ -84,5 +84,9 @@ export class Listing implements IListing {
   @Column({ type: "int", default: 0 })
   itemsExpectedCount: number;
 
+  @Column({
+    type: 'int',
+  })
+  number: number;
 
 }

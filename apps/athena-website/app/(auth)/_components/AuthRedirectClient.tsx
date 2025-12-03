@@ -15,7 +15,7 @@ export default function AuthRedirectClient() {
       }
     };
     runCheck();
-  }, [auth, router]);
+  }, []);
 
   return null;
 }

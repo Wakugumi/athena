@@ -1,40 +1,71 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { Subject } from 'rxjs';
-import { OnEvent } from '@nestjs/event-emitter';
+import { Observable, Subject } from 'rxjs';
 import { NOTIFICATION_QUEUE, NotificationEvent, NotificationJob } from './types/notification.constants';
+import { Notification } from './notification.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { NotificationEventPayload } from './types/notification.types';
-import { NotificationCategory } from '@athena/types';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
-export class NotificationService {
+export class NotificationService implements OnModuleInit {
+
+  private notifications$ = new Subject<Notification>();
+
   constructor(
-    @InjectQueue(NOTIFICATION_QUEUE)
-    private queue: Queue<NotificationEventPayload, any, NotificationJob>,
+    @InjectQueue(NOTIFICATION_QUEUE) private notificationQueue: Queue,
+    @InjectRepository(Notification) private notificationRepo: Repository<Notification>
   ) { }
 
-  private streams = new Map<string, Subject<any>>();
-
-  getStream(userId: string): Subject<any> | undefined {
-    if (!this.streams.has(userId)) {
-      this.streams.set(userId, new Subject());
-    }
-    return this.streams.get(userId);
+  async onModuleInit() {
+    console.log('NotificationsService initialized');
   }
 
-  async enqueue(userId: string, category: NotificationCategory, message: string, meta?: Record<string, any>) {
-    await this.queue.add(NotificationJob.CREATE, { userId, category, message, meta });
+  // Add notification to queue
+  async queueNotification(notification: Omit<Notification, 'id' | 'createdAt' | 'read' | 'user'>) {
+    const fullNotification: Notification = await this.notificationRepo.save({
+      ...notification,
+    });
+
+    await this.notificationQueue.add(NotificationJob.CREATE, fullNotification, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
+      },
+    });
+
+    return fullNotification;
+  }
+
+  sendNotification(notification: Notification) {
+    this.notifications$.next(notification);
+  }
+
+  // Get notification stream for SSE
+  getNotifications(userId?: string): Observable<Notification> {
+    return new Observable((observer) => {
+      const subscription = this.notifications$.subscribe({
+        next: (notification) => {
+          // Filter by userId if provided
+          if (!userId || !notification.userId || notification.userId === userId) {
+            observer.next(notification);
+          }
+        },
+        error: (err) => observer.error(err),
+      });
+
+      return () => subscription.unsubscribe();
+    });
   }
 
 
   @OnEvent(NotificationEvent.FIRE)
-  async onNotify(event: NotificationEventPayload) {
-    await this.enqueue(event.userId, event.category, event.message, event.meta);
-  }
+  async listen(event: NotificationEventPayload) {
+    await this.queueNotification({ category: event.category, message: event.message, userId: event.userId })
 
-  pushToClient(userId: string, notification: any) {
-    this.streams.get(userId)?.next(notification)
   }
 }

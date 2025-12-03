@@ -15,7 +15,6 @@ import { FileUploadedEvent } from "../events/file-uploaded.event";
 import { randomUUID } from "crypto";
 import { UploadInstruction } from "@athena/types";
 import { UPLOAD_CALLBACK_URL } from "../types/storage.tokens";
-import { join } from "path";
 
 export interface UploadParams {
   domain: UploadDomain;
@@ -38,7 +37,7 @@ export class UploadService {
 
 
   private generateCallbackUrl(uploadId: string) {
-    return join(this.callback_url, "upload", uploadId)
+    return `${this.callback_url}/upload/${uploadId}`
 
   }
 

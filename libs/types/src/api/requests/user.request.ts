@@ -1,4 +1,5 @@
 import { User, UserWithoutPassword } from "../../entities";
+import { ContentTypes } from "../../enums";
 
 
 /**
@@ -33,8 +34,9 @@ export interface UpdateProfileRequest {
 }
 
 export interface UpdateAvatarRequest {
-  blob: Blob | File
+  contentType: ContentTypes
 }
+
 
 /**
  * Request for updating user's private data

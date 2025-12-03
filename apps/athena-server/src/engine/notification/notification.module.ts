@@ -5,12 +5,12 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
 
 import { Notification } from './notification.entity';
-import { NotificationService } from './notification.service';
-import { NotificationConsumer } from './consumers/notification.consumer';
-import { NotificationController } from './notification.controller';
 import { NOTIFICATION_QUEUE } from './types/notification.constants';
 import { AthenaConfigModule } from '../athena-config/athena-config.module';
 import { AthenaConfigService } from '../athena-config/athena-config.service';
+import { NotificationService } from './notification.service';
+import { NotificationConsumer } from './consumers/notification.consumer';
+import { NotificationController } from './notification.controller';
 
 @Module({
   imports: [

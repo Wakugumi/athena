@@ -1,10 +1,10 @@
 
-import { NotificationCategory } from '@athena/types';
+import { NotificationCategory, Notification as INotification } from '@athena/types';
 import { User } from 'src/core/user/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Relation, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
-export class Notification {
+export class Notification implements INotification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

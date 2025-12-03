@@ -12,7 +12,6 @@ export interface UpdateListingRequest {
   price?: number | null;
   license?: License | null;
   description?: string | null;
-  visibility?: Visibility | null;
   summary?: string | null;
 
 };

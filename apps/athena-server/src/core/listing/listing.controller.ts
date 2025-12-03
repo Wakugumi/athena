@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, Put, Query, UseFilters, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, PartialType } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/engine/auth/guards/auth-jwt.guard";
@@ -22,6 +22,10 @@ import { HttpStatusCode } from "axios";
 import { ApiResponseDto } from "src/utils/api-response-wrapper.util";
 import { DeleteDraftListingCommand } from "./commands/delete-draft-listing.command";
 import { TakedownListingCommand } from "./commands/takedown-listing.command";
+import { FetchListingsResponseDTO } from "../market/dtos/fetch-listings.output";
+import { PagingOptionsDto } from "src/common/dtos/paging-options.dto";
+import { FetchDraftQuery } from "./queries/fetch-draft.query";
+import { FetchListingQuery } from "./queries/fetch-listing.query";
 
 @Controller('listing')
 @UseGuards(JwtAuthGuard)
@@ -38,12 +42,24 @@ export class ListingController {
   @ApiQuery({ name: 'seller', type: "string", description: 'search by username or first name and last name of the seller', required: false })
   @ApiQuery({ name: 'min_price', type: 'number', description: 'minimum price range', required: false })
   @ApiQuery({ name: 'max_price', type: 'number', description: 'maximum price range', required: false })
-  async search(@Query('title') title: string, @Query('seller') seller: string, @Query('min_price') minPrice: number, @Query('max_price') maxPrice: number) {
+  async search(@Query() paging: PagingOptionsDto, @Query('title') title: string, @Query('seller') seller: string, @Query('min_price') minPrice: number, @Query('max_price') maxPrice: number) {
     return await this.queryBus.execute<SearchListingQuery>(
-      new SearchListingQuery(title, seller, minPrice, maxPrice)
+      new SearchListingQuery(paging, title, seller, minPrice, maxPrice)
     )
   }
 
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: FetchListingsResponseDTO })
+  @ApiQuery({ name: 'q', type: 'string', required: false })
+  @ApiQuery({ name: 'visibility', type: 'enum', enum: Visibility, required: false })
+  async me(@CurrentUser() user: User, @Query() paging: PagingOptionsDto, @Query("q") query?: string, @Query('visibility') visibility?: Visibility) {
+    return await this.queryBus.execute<FetchListingsQuery>(
+      new FetchListingsQuery(paging, user.id, undefined, query ?? undefined, visibility ?? undefined, undefined)
+    )
+
+  }
 
   @Get('draft')
   @ApiBearerAuth()
@@ -53,9 +69,9 @@ export class ListingController {
       description: "Fetch user's drafts"
     }
   )
-  async getDrafts(@CurrentUser() user: User): Promise<Listing[]> {
+  async getDrafts(@CurrentUser() user: User, @Query() paging: PagingOptionsDto, @Query('q') query?: string) {
     return await this.queryBus.execute<FetchListingsQuery>(
-      new FetchListingsQuery(user.id, undefined, undefined, Visibility.DRAFT)
+      new FetchListingsQuery(paging, user.id, undefined, query ?? undefined, Visibility.DRAFT, undefined)
     )
   }
 
@@ -68,11 +84,9 @@ export class ListingController {
     }
   )
   async getDraft(@CurrentUser() user: User, @Param('id') listingId: string): Promise<Listing> {
-    const listings = await this.queryBus.execute<FetchListingsQuery>(
-      new FetchListingsQuery(user.id, listingId, undefined, Visibility.DRAFT, undefined)
+    return await this.queryBus.execute<FetchDraftQuery>(
+      new FetchDraftQuery(listingId, user.id)
     )
-
-    return listings[0];
   }
 
 
@@ -148,14 +162,10 @@ export class ListingController {
   @ApiOperation({ description: "Fetch a detailed PUBLISHED listing only, with Private or Public visibility" })
   @ApiOkResponse({ type: FetchListingResponseDTO })
   async get(@Param('id') listingId: string) {
-    const result = (await this.queryBus.execute<FetchListingsQuery>(
-      new FetchListingsQuery(undefined, listingId, undefined, undefined, ListingStatus.PUBLISHED)
-    ))[0]
+    return await this.queryBus.execute<FetchListingQuery>(
+      new FetchListingQuery(listingId,)
+    )
 
-    if (!result)
-      throw new HttpException("Listing not exist", HttpStatusCode.NotFound)
-
-    return result
   }
 
 

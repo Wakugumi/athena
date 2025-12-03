@@ -27,6 +27,8 @@ const theme = createTheme({
         "bg-secondary text-secondary-text hover:bg-secondary-600 focus:ring-4 focus:ring-secondary-300 dark:bg-secondary dark:text-secondary-text dark:hover:bg-secondary-600 dark:focus:ring-secondary-300",
       light:
         "bg-surface text-foreground hover:bg-muted focus:ring-4 focus:ring-border dark:bg-surface dark:text-foreground dark:hover:bg-muted dark:focus:ring-border",
+
+      danger: "border border-red-700 text-red-700 hover:bg-red-300 focus:ring-4 focus:ring-border dark:bg-surface dark:text-foreground dark:focus:ring-border"
     },
   },
   badge: {
@@ -45,6 +47,53 @@ const theme = createTheme({
       },
     },
   },
+  textInput: {
+    field: {
+      input: {
+
+        base: "outline bg-surface",
+        colors: {
+          default: "bg-surface",
+          primary: 'bg-surface text-foreground hover:shadow-lg focus:ring-1'
+
+        }
+      }
+    }
+  },
+  dropdown: {
+    "floating": {
+      "animation": "transition-opacity",
+      "arrow": {
+        "base": "absolute z-10 h-2 w-2 rotate-45",
+        "style": {
+          "dark": "bg-gray-900 dark:bg-gray-700",
+          "light": "bg-white",
+          "auto": "bg-white dark:bg-gray-700"
+        },
+        "placement": "-4px",
+
+      },
+      base: "z-10 w-fit divide-y divide-gray-100 rounded shadow focus:outline-none",
+      style: {
+        "auto": "border border-gray-200 bg-white text-gray-900 dark:border-none dark:bg-gray-700 dark:text-white"
+      }
+    }
+
+  },
+  modal: {
+
+    root: {
+      base: "bg-surface",
+      show: {
+        on: "flex bg-surface",
+        off: "hidden"
+      }
+    },
+    content: {
+      inner: "relative flex max-h-[90dvh] flex-col rounded-lg bg-surface shadow"
+    }
+
+  }
 });
 
 export default function RootLayout({
@@ -56,13 +105,12 @@ export default function RootLayout({
     <>
       <html lang="en" suppressHydrationWarning={true}>
         <head>
-          <ThemeModeScript />
         </head>
         <body>
-          <ThemeProvider theme={theme as any}>
+          <ThemeProvider theme={theme as any} >
             <AuthProvider>
               <PopupProvider>
-                  {children}
+                {children}
               </PopupProvider>
             </AuthProvider>
           </ThemeProvider>
