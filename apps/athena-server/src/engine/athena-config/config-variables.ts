@@ -48,6 +48,14 @@ export class ConfigVariables {
     type: ConfigVariableType.STRING
   })
   REDIS_PORT: number = 6379
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.ServerConfig,
+    description: 'Password for Redis Instance',
+    type: ConfigVariableType.STRING,
+    isSensitive: true
+  })
+  REDIS_PASSWORD: string;
+
 
 
   // DATABASE CONFIG

@@ -24,6 +24,9 @@ import { NotificationController } from './notification.controller';
           connection: {
             host: config.get("REDIS_HOST"),
             port: config.get("REDIS_PORT")
+            ,
+            password: config.get("REDIS_PASSWORD"),
+            tls: {}   // <= REQUIRED for Azure Cache for Redis
           },
         }
       }

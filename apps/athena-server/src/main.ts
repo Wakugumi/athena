@@ -16,7 +16,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor())
 
   app.enableCors({
-    origin: ['http://localhost:3001'],
+    origin: ['http://localhost:3001', 'https://athena-website.azurewebsites.net/'],
     credentials: true
   });
 
