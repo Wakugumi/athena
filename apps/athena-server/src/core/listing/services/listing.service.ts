@@ -16,6 +16,7 @@ import { ListingDeleteEvent } from "../events/listing-delete.event";
 import { StorageService } from "src/engine/storage/services/storage.service";
 import { NotificationEvent } from "src/engine/notification/types/notification.constants";
 import { NotificationEventPayload } from "src/engine/notification/types/notification.types";
+import { randomUUID } from "node:crypto";
 
 @Injectable()
 export class ListingService {
@@ -61,6 +62,7 @@ export class ListingService {
       const next = (max?.number ?? 0) + 1;
       const newListing = await x.save(Listing, {
         ...payload,
+        id: randomUUID(),
         title: `New Draft ${next}`,
         visibility: Visibility.DRAFT,
         status: ListingStatus.DRAFT,

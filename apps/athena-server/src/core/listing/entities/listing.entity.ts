@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 
 
 @Entity('listing')
+@Index("IDX_LISTING_TITLE", ['title'])
 export class Listing implements IListing {
   @PrimaryColumn('uuid')
   id: string = randomUUID()
