@@ -18,7 +18,7 @@ export function ListingCard(props: Props) {
       {/* Preview */}
       <div className="min-h-0">
         <MarkdownPreview
-          className="flex-1 h-[20vh] overflow-y-auto rounded-xl"
+          className="h-[20vh] overflow-y-auto rounded-xl"
           content={props.data.preview ?? props.data.summary}
         />
       </div>
@@ -29,12 +29,12 @@ export function ListingCard(props: Props) {
       </h5>
 
       {/* Price */}
-      <div className="flex-1 text-foreground font-bold text-sm">
+      <div className="text-foreground font-bold text-sm">
         TOKEN {props.data.price}
       </div>
 
       {/* Author */}
-      <div className="flex-1 flex items-center gap-2 text-xs mt-1">
+      <div className="flex items-center gap-2 text-xs mt-1">
         <Avatar img={props.data.owner?.avatar ?? ""} rounded size="xs" />
         <span className="flex items-center gap-1">
           {props.data.owner?.displayName} <HiCheckCircle />

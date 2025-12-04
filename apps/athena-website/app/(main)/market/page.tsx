@@ -41,11 +41,11 @@ export default function MarketPage() {
       setLoading(true);
       setError(null);
       try {
-        const users = (await UserService.searchUsers(debouncedQuery));
+        const userFetch = (await UserService.searchUsers(debouncedQuery));
         if (!cancelled) setUsers(users ?? [])
 
         const populars = (await UserService.searchUsers(""));
-        if (!cancelled) setPopularUsers(users ?? [])
+        setPopularUsers(userFetch ?? [])
       } catch (e: any) {
         if (!cancelled) setError(e?.message ?? "Failed to fetch listings");
       } finally {
@@ -65,11 +65,11 @@ export default function MarketPage() {
 
         <div>
           <h1 className="text-foreground text-xl mb-4">Users</h1>
-          <div className="flex flex-row overflow-x-auto gap-4">
+          <div className="flex flex-row max-w-[100vw] overflow-x-auto whitespace-nowrap gap-4">
 
             {popularUsers.map((user, index) => (<>
 
-              <a key={index} href={`${user.username}/`}>
+              <a key={index} href={`${user.username}/`} className="shrink-0">
                 <div className="flex flex-col items-center gap-2 justify-center">
                   <Avatar rounded img={user.avatar} />
                   <span className="text-foreground">{user.displayName}</span>
