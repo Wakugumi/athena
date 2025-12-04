@@ -111,9 +111,9 @@ export default function MarketPage() {
           <p className="mt-4 text-sm text-gray-500">No listings found.</p>
         )}
 
-        {listings?.data.length! > listings?.limit! &&
+        {listings?.total! > listings?.limit! &&
           <div className="flex overflow-x-auto sm:justify-center">
-            <Pagination layout="navigation" currentPage={page} totalPages={listings?.total ?? 1} onPageChange={(x) => setPage(x)} />
+            <Pagination layout="navigation" currentPage={page} totalPages={listings?.total! / listings?.limit!} onPageChange={(x) => setPage(x)} />
           </div>
         }
       </div>
