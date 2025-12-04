@@ -25,7 +25,7 @@ export function ListingCard(props: Props) {
 
       {/* Title */}
       <h5 className="flex-1 mt-2 text-sm font-medium text-foreground">
-        {props.data.title.slice(0, 50)}
+        {props.data.title.slice(0, 30)}
       </h5>
 
       {/* Price */}
