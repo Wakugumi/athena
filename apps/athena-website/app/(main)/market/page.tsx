@@ -113,7 +113,7 @@ export default function MarketPage() {
 
         {listings?.total! > listings?.limit! &&
           <div className="flex overflow-x-auto sm:justify-center">
-            <Pagination layout="navigation" currentPage={page} totalPages={listings?.total! / listings?.limit!} onPageChange={(x) => setPage(x)} />
+            <Pagination layout="navigation" currentPage={page} totalPages={listings?.total!} onPageChange={(x) => setPage(x)} />
           </div>
         }
       </div>
