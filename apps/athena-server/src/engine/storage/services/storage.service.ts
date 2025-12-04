@@ -109,11 +109,14 @@ export class StorageService implements StorageDriver {
     return this.driver.getUploadUrl(params)
   }
   getUrl(params: { key: string; expiresInSeconds?: number; }): string {
+    if (!params.expiresInSeconds)
+      return this.buildPublicUrl(params.key)
     if (this.driver.getUrl)
       return this.driver.getUrl(params)
 
-
     return this.buildPublicUrl(params.key)
+
+
 
   }
 

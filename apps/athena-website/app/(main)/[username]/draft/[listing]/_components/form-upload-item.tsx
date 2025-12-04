@@ -5,7 +5,7 @@ import { getPublicBlobUrl } from "@/app/_utils/storage-url.util";
 import { ListingItem } from "@athena/types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Badge } from "flowbite-react";
+import { Badge, Spinner } from "flowbite-react";
 import { DragEvent, useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -111,7 +111,7 @@ export default function DraftFormUploadItem({
         onDragLeave={() => setDragActive(false)}
         onDrop={onDrop}
       >
-        {disabled ? "Uploading…" : "Drop file here or click to upload"}
+        {disabled ? <>Uploading {progress}% <Spinner color="success" /></> : "Drop file here or click to upload"}
       </div>
 
       {/* HIDDEN INPUT */}

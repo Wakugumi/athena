@@ -11,6 +11,7 @@ import { formatDate } from "../../market/_utils/formatting.util";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import ListingService from "@/api/ListingService";
 import Loading from "@/app/loading";
+import { useParams, useRouter } from "next/navigation";
 
 
 
@@ -23,9 +24,14 @@ function generateListingLink(list: Listing, username: string) {
 
 }
 export default function UserDrafts() {
+  const router = useRouter()
+  const { username } = useParams()
 
   const mutation = useMutation({
     mutationFn: () => ListingService.createDraft(),
+    onSuccess: (data) => {
+      router.push(`/${username}/draft/${toSlug(data?.title!)}?id=${data?.id}`)
+    }
   })
 
   const [page, setPage] = useState(1);
@@ -48,7 +54,7 @@ export default function UserDrafts() {
       <div className="flex md:flex-row flex-wrap items-stretch w-full gap-4">
 
         <TextInput color="primary" className="flex-1" placeholder="Search by title..." value={query} onChange={(e) => setQuery(e.target.value)} />
-        <Button color="primary" onClick={() => { mutation.mutate() }}><HiPlus size={18} className="mr-4" />New</Button>
+        <Button disabled={mutation.isPending} color="primary" onClick={() => { mutation.mutate() }}><HiPlus size={18} className="mr-4" />New</Button>
 
 
       </div>
@@ -61,32 +67,39 @@ export default function UserDrafts() {
 
 
 
-      {drafts.isLoading && <Loading />}
-      {datas?.data && <div className="flex-col gap-2 items-stretch">
-        {datas?.data?.map((list, index) => (
+      {mutation.isError && <div className="bg-red-700 text-red-100 p-4 rounded-lg">{mutation.error?.message}</div>}
+      {mutation.isIdle && <>      {drafts.isLoading && <Loading />}
 
-          <div key={index}>
+        {datas?.data && <div className="flex-col gap-2 items-stretch">
+          {datas?.data?.map((list, index) => (
 
-            <div className="flex flex-row content-between items-center">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-row items-center gap-2">
-                  <Link className="text-xl font-bold text-blue-400" href={generateListingLink(list, list.owner?.username!)}>{list.title}</Link>
-                  <Badge color="gray" size="md">{list.visibility}</Badge>
+            <div key={index}>
 
+              <div className="flex flex-row content-between items-center">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-row items-center gap-2">
+                    <Link className="text-xl font-bold text-blue-400" href={generateListingLink(list, list.owner?.username!)}>{list.title}</Link>
+                    <Badge color="gray" size="md">{list.visibility}</Badge>
+
+                  </div>
+                  <span className="text-gray-400 text-sm flex items-center"><HiDownload className="mr-2" /> {list.downloads} | Last updated at {formatDate(list.updatedAt)}</span>
                 </div>
-                <span className="text-gray-400 text-sm flex items-center"><HiDownload className="mr-2" /> {list.downloads} | Last updated at {formatDate(list.updatedAt)}</span>
+                <div></div>
               </div>
-              <div></div>
+              <HR />
+
             </div>
-            <HR />
+          ))}
+        </div>}
 
-          </div>
-        ))}
-      </div>}
+        {drafts.data?.total! > drafts.data?.limit! &&
+          <Pagination color="primary" currentPage={page} onPageChange={(x) => setPage(x)} totalPages={drafts.data?.total!} />
+        }
+      </>
 
-      {drafts.data?.total! > drafts.data?.limit! &&
-        <Pagination color="primary" currentPage={page} onPageChange={(x) => setPage(x)} totalPages={drafts.data?.total!} />
       }
+
+      {mutation.isPending && <Loading />}
     </div>
 
   </>)

@@ -13,22 +13,32 @@ export function ListingCard(props: Props) {
 
 
   return (
-    <div className="flex flex-col text-foreground h-[40vh] space-y-4">
-      <div className="h-[50%] w-full overflow-y-scroll">
-        <MarkdownPreview content={props.data.preview ?? props.data.summary} />
+
+    <div className="flex flex-col h-[30vh] rounded-xl">
+      {/* Preview */}
+      <div className="min-h-0">
+        <MarkdownPreview
+          className="flex-1 h-[20vh] overflow-y-auto rounded-xl"
+          content={props.data.preview ?? props.data.summary}
+        />
       </div>
 
+      {/* Title */}
+      <h5 className="flex-1 mt-2 text-sm font-medium text-foreground">
+        {props.data.title.slice(0, 50)}
+      </h5>
 
-      <div className="h-[50%] p-2 space-y-2">
-        <h5 className="text-sm tracking-tight text-foreground">
-          {props.data.title}
-        </h5>
-        <div className="text-foreground font-bold">{props.data.currency} {props.data.price}</div>
+      {/* Price */}
+      <div className="flex-1 text-foreground font-bold text-sm">
+        TOKEN {props.data.price}
+      </div>
 
-        <div className="flex flex-row items-center gap-2">
-          <Avatar img={props.data.owner?.avatar ?? ""} rounded size="xs" />
-          <span className="flex items-center gap-2 text-xs">{props.data.owner?.displayName} <HiCheckCircle /></span>
-        </div>
+      {/* Author */}
+      <div className="flex-1 flex items-center gap-2 text-xs mt-1">
+        <Avatar img={props.data.owner?.avatar ?? ""} rounded size="xs" />
+        <span className="flex items-center gap-1">
+          {props.data.owner?.displayName} <HiCheckCircle />
+        </span>
       </div>
     </div>
   )

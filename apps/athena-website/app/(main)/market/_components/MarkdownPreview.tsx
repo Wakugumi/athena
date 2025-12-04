@@ -5,14 +5,15 @@ import remarkGfm from "remark-gfm";
 
 import ShadowRoot from 'react-shadow'
 interface Props {
-  content: string
+  content: string;
+  className?: string
 }
 export function MarkdownPreview(props: Props) {
 
 
   return (
 
-    <ShadowRoot.div>
+    <ShadowRoot.div className={props.className}>
       <style>
         {`
         .paper {

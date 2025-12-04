@@ -9,8 +9,6 @@ import { Avatar, Badge, Button, Dropdown, HR, Label, Modal, ModalBody, ModalFoot
 import ProfileCard from "../../_components/ProfileCard";
 import Loading from "@/app/loading";
 import DraftFormUploadItem from "./_components/form-upload-item";
-import NotFound from "@/app/not-found";
-import { useAuth } from "@/context/AuthContext";
 import { toSlug } from "@/app/_utils/slugify.util";
 import useMutatePublish from "@/queries/mutations/useMutatePublish";
 import { useQuery, useQueryErrorResetBoundary } from "@tanstack/react-query";
@@ -21,23 +19,23 @@ export default function DraftListingPage() {
   const search = useSearchParams()
   const { username, listing: urlSlug } = useParams()
   const [modalPublish, setModalPublish] = useState<boolean>(false)
-  const title = decodeURIComponent(urlSlug as string);
   const listingId = search.get('id')
   const { form, updateField, loading: formLoading, saving, error: formError, synced } = useFormListing(listingId!)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false);
 
-  const auth = useAuth()
   const router = useRouter()
 
   const query = useQuery({
     queryKey: [`fetchDraft`],
     queryFn: () => ListingService.getMyDraft(listingId!),
+    refetchInterval: 2000
   })
   const listing = query.data
 
   const mutation = useMutatePublish({
     onSettled: (data) => {
+      console.log(data)
 
       router.push(`/${username}/${toSlug(data.title as string)}?id=${data.id}`)
     }

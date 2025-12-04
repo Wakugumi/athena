@@ -93,13 +93,13 @@ export default function MarketPage() {
 
         <h1 className="text-foreground text-xl mb-4">Discover Notes and Knowledge</h1>
         {listings &&
-          <div className="grid gap-4 grid-cols-2 grid-rows-2 md:grid-cols-3">
+          <div className="grid gap-4 md:gap-8 grid-cols-2 grid-rows-2 md:grid-cols-3">
 
             {listings.data.map((listing) => (
               <a
                 key={String(listing.id)}
                 href={`/${listing.owner!.username}/${toSlug(listing.title)}?id=${listing.id}`}
-                className="group transition hover:shadow-md"
+                className="group transition"
               >
                 <ListingCard data={listing} />
               </a>

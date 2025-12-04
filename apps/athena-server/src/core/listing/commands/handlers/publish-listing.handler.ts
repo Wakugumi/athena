@@ -13,16 +13,14 @@ export class PublishListingHandler implements ICommandHandler<PublishListingComm
   }
 
 
-  async execute(command: PublishListingCommand): Promise<{ listing: Partial<Listing>; }> {
+  async execute(command: PublishListingCommand): Promise<Partial<Listing>> {
     await this.listingService.ensureUserOwnsListing(command.userId, command.listingId)
 
     const listing = await this.listingService.publishListing(command.listingId);
 
     this.logger.log("published new listing", 'publish_listing')
 
-    return {
-      listing: listing
-    }
+    return listing
 
 
   }

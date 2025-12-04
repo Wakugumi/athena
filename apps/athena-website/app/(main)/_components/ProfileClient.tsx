@@ -5,12 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import { usePopup } from "@/context/PopupContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Avatar, Button, Dropdown, DropdownDivider, DropdownHeader, DropdownItem } from "flowbite-react";
-import { HiBell, HiLogout } from "react-icons/hi";
+import { HiBell, HiDocument, HiLogout, HiShoppingCart } from "react-icons/hi";
 import NotificationCenter from "./NotificationCenter";
 import { NotificationBadge } from "./NotificationBadge";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import WalletCard from "./WalletCard";
+import Link from "next/link";
 
 interface ProfileClientProps {
   onLogout?: () => void;
@@ -65,6 +66,11 @@ export default function ProfileClient({
           <WalletCard />
         </div>
 
+
+
+        <DropdownDivider />
+        <DropdownItem icon={HiShoppingCart} as={Link} href={`/${auth.user?.username}?tab=listings`}>My Listing</DropdownItem>
+        <DropdownItem icon={HiDocument} as={Link} href={`/${auth.user?.username}?tab=drafts`}>My Drafts</DropdownItem>
 
 
         <DropdownDivider />
